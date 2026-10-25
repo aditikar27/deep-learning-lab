@@ -1,0 +1,2308 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Deep Learning Lab Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: fixed left rail with the six steps (a real sequence), one view at a time on the right.
+   On phones the rail becomes a sticky, scrollable tab strip. Code blocks stay dark in both themes. */
+:root{
+  --bg:#EDF0F5; --surface:#FFFFFF; --surface2:#E4E9F1; --ink:#0F1A2B; --muted:#4F5C72; --line:#D0D8E4;
+  --accent:#2547D0; --accent-ink:#FFFFFF; --accent-soft:#E2E8FC;
+  --good:#17704A; --good-soft:#DCF2E6; --warn:#9A4108; --warn-soft:#FBEBDD; --bad:#B02236; --bad-soft:#FBE3E6;
+  --code-bg:#0F1A2B; --code-ink:#E4EAF5; --code-line:#25334D;
+  --hl-kw:#8FB0FF; --hl-str:#9BE3B5; --hl-num:#F6C177; --hl-com:#7F8DA8; --hl-fn:#F5A3B1; --hl-bi:#7FD6E6;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1220; --surface:#151C2E; --surface2:#1D2740; --ink:#E6EBF5; --muted:#9AA7C0; --line:#2A3654;
+    --accent:#86A0FF; --accent-ink:#0D1220; --accent-soft:#1F2C58;
+    --good:#6FD3A0; --good-soft:#143427; --warn:#F0A267; --warn-soft:#3A2410; --bad:#F28A98; --bad-soft:#3C1620;
+    --code-bg:#0A0F1B; --code-line:#222E49; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1220; --surface:#151C2E; --surface2:#1D2740; --ink:#E6EBF5; --muted:#9AA7C0; --line:#2A3654;
+  --accent:#86A0FF; --accent-ink:#0D1220; --accent-soft:#1F2C58;
+  --good:#6FD3A0; --good-soft:#143427; --warn:#F0A267; --warn-soft:#3A2410; --bad:#F28A98; --bad-soft:#3C1620;
+  --code-bg:#0A0F1B; --code-line:#222E49; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:4px;overflow-wrap:anywhere}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.shell{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px;align-items:start}
+.side{position:sticky;top:env(safe-area-inset-top,0px);padding-block:28px;display:flex;flex-direction:column;gap:22px;max-height:100vh;overflow-y:auto}
+.brand{display:flex;flex-direction:column;gap:4px}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:1.35rem;letter-spacing:-.01em;line-height:1.1}
+.brand span{font-size:.82rem;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-weight:500;font-size:.95rem}
+.nav a i{font-style:normal;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);width:24px;height:24px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center}
+.nav a:hover{background:var(--surface2)}
+.nav a[aria-current="true"]{background:var(--accent);color:var(--accent-ink)}
+.nav a[aria-current="true"] i{border-color:currentColor;color:inherit}
+.labs-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.labs-mini a{font-family:var(--f-mono);font-size:.78rem;text-align:center;padding:6px 0;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--muted);background:var(--surface)}
+.labs-mini a:hover{color:var(--accent);border-color:var(--accent)}
+.side h5{margin:0 0 8px;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.theme-btn{font:inherit;font-size:.82rem;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;align-self:flex-start}
+
+main{padding-block:36px 24px;min-width:0}
+.view{display:none}
+.view.on{display:block}
+.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.sec-head h2{font-size:clamp(2rem,4.4vw,3.1rem);font-weight:800;letter-spacing:-.02em}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+h3.h{font-size:1.45rem;font-weight:700;margin:40px 0 14px;letter-spacing:-.01em}
+h3.h:first-child{margin-top:0}
+h4.sh{font-size:1.02rem;font-weight:700;margin:22px 0 8px}
+.prose p{max-width:68ch;margin-bottom:12px}
+.prose ul,.prose ol{max-width:68ch;padding-left:1.25rem;margin:0 0 12px}
+.prose li{margin-bottom:5px}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.card h4{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.card p{font-size:.95rem;color:var(--muted)}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:500;white-space:nowrap}
+.tag.neutral{background:var(--surface2);color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+
+.callout{border-radius:10px;padding:14px 16px;font-size:.95rem;border:1px solid transparent;margin:16px 0;max-width:78ch}
+.callout b{font-weight:600}
+.callout.info{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 25%,transparent)}
+.callout.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.callout.bad{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}
+.callout.ok{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 30%,transparent)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0 20px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:560px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface2);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.chip{font:inherit;font-size:.9rem;padding:7px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.pcard{display:grid;grid-template-columns:76px minmax(0,1fr);gap:18px}
+.pcard .num{font-family:var(--f-display);font-weight:800;font-size:2.6rem;line-height:1;color:var(--accent)}
+.pcard .num small{display:block;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-bottom:4px}
+.pcard h4{font-size:1.18rem;margin-bottom:8px}
+.pcard q{display:block;font-style:italic;color:var(--ink);margin-bottom:10px;font-size:.95rem;quotes:"“" "”"}
+.pcard dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:4px 12px;margin:0 0 12px;font-size:.9rem}
+.pcard dt{color:var(--muted);font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.pcard dd{margin:0}
+.pcard.dim{opacity:.35}
+.links{display:flex;flex-wrap:wrap;gap:14px;font-size:.9rem;font-weight:500}
+
+.mermaid-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;margin:12px 0 28px}
+
+/* concepts */
+details.concept{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+details.concept>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;gap:14px;align-items:center}
+details.concept>summary::-webkit-details-marker{display:none}
+details.concept>summary .n{font-family:var(--f-mono);font-size:.78rem;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:2px 8px;white-space:nowrap}
+details.concept>summary b{font-family:var(--f-display);font-size:1.2rem;font-weight:700;flex:1;min-width:0}
+details.concept>summary::after{content:"+";font-size:1.4rem;color:var(--muted);line-height:1}
+details.concept[open]>summary::after{content:"\2212"}
+.cbody{padding:4px 18px 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px}
+.cbody h5{margin:0 0 6px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.cbody ul{margin:0;padding-left:1.1rem;font-size:.95rem}
+.cbody li{margin-bottom:4px}
+.cbody p{font-size:.95rem}
+.cbody .wide{grid-column:1/-1}
+.gl{font-size:.92rem}
+.gl b{display:block;font-family:var(--f-display);font-size:1.02rem;margin-bottom:2px}
+
+/* code */
+.labnav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.labnav button{font:inherit;font-size:.9rem;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;gap:8px;align-items:baseline}
+.labnav button b{font-family:var(--f-mono);font-size:.78rem;color:var(--accent)}
+.labnav button span{color:var(--muted);font-size:.82rem}
+.labnav button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.labnav button[aria-pressed="true"] b,.labnav button[aria-pressed="true"] span{color:inherit}
+.lab{display:none}
+.lab.on{display:block}
+.lab-head{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.lab-head h3{font-size:clamp(1.6rem,3.2vw,2.2rem);font-weight:800;letter-spacing:-.02em}
+.adapt{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0 22px}
+.adapt h4{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:var(--f-body);font-weight:600}
+.adapt ul{margin:0;padding-left:1.1rem;font-size:.95rem}
+.adapt li{margin-bottom:4px}
+.cb{border-radius:10px;overflow:hidden;background:var(--code-bg);border:1px solid var(--code-line);margin:0 0 18px;max-width:100%}
+.cb-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--code-line);color:#A9B6D0;font-family:var(--f-mono);font-size:.76rem}
+.cb-head span{min-width:0;overflow-wrap:anywhere}
+.cb-head button{font:inherit;font-size:.76rem;color:#E4EAF5;background:#1B2744;border:1px solid #33456B;border-radius:6px;padding:4px 10px;cursor:pointer;flex:none}
+.cb-head button:hover{background:#24345C}
+.cb pre{margin:0;padding:14px 16px;overflow-x:auto;color:var(--code-ink);font-family:var(--f-mono);font-size:.82rem;line-height:1.6;tab-size:4}
+.cb pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal;color:inherit}
+.hljs-keyword,.hljs-literal,.hljs-selector-tag{color:var(--hl-kw)}
+.hljs-string,.hljs-regexp,.hljs-subst{color:var(--hl-str)}
+.hljs-number{color:var(--hl-num)}
+.hljs-comment{color:var(--hl-com);font-style:italic}
+.hljs-title,.hljs-title.function_{color:var(--hl-fn)}
+.hljs-built_in,.hljs-type,.hljs-class .hljs-title{color:var(--hl-bi)}
+.hljs-meta,.hljs-variable{color:var(--hl-num)}
+.lab-note{margin-top:8px}
+
+@media (max-width:1000px){
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .side{padding-block:12px 8px;gap:8px;max-height:none;overflow:visible;background:var(--bg);z-index:20;border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+  .brand span,.side>div.minis,.theme-btn{display:none}
+  .brand b{font-size:1.1rem}
+  .nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .nav a{grid-template-columns:auto auto;white-space:nowrap;padding:7px 12px;border:1px solid var(--line);background:var(--surface)}
+  .nav a[aria-current="true"]{border-color:var(--accent)}
+  main{padding-block:24px}
+  .g2,.g3,.g4,.cbody{grid-template-columns:minmax(0,1fr)}
+  .pcard{grid-template-columns:minmax(0,1fr);gap:8px}
+  .pcard .num{font-size:2rem}
+  .pcard .num small{display:inline;margin-right:8px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><b>Deep Learning<br>Lab Notes</b><span>Eight labs, one reference. By Aditi Kar.</span></div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#recognize" data-view="recognize"><i>1</i>Recognize the problem</a>
+      <a href="#concepts" data-view="concepts"><i>2</i>Choose the concept</a>
+      <a href="#code" data-view="code"><i>3</i>Reusable code</a>
+      <a href="#refs" data-view="refs"><i>4</i>Further reading</a>
+      <a href="#run" data-view="run"><i>5</i>Kaggle &amp; Colab</a>
+      <a href="#errors" data-view="errors"><i>6</i>Errors &amp; fixes</a>
+    </nav>
+    <div class="minis">
+      <h5>Jump to a lab's code</h5>
+      <div class="labs-mini">
+        <a href="#lab1">L1</a><a href="#lab2">L2</a><a href="#lab3">L3</a><a href="#lab4">L4</a>
+        <a href="#lab5">L5</a><a href="#lab6">L6</a><a href="#lab7">L7</a><a href="#lab8">L8</a>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">Switch theme</button>
+  </aside>
+
+  <main>
+<!-- ============ 1. RECOGNIZE ============ -->
+<section class="view" id="v-recognize">
+  <header class="sec-head">
+    <span class="eyebrow">Step 1 of 6</span>
+    <h2>Recognize the problem</h2>
+    <p class="lede">Read the problem statement and pull out two facts: what the input looks like and what the answer looks like. Those two facts point to one lab.</p>
+  </header>
+
+  <div class="grid g3">
+    <div class="card"><h4>What is the input?</h4><p>Rows and columns in a CSV, a CSV of pixel values, image files in folders, images with box labels, or raw text.</p></div>
+    <div class="card"><h4>What is the output?</h4><p>A yes/no, one of many classes, a number, boxes around objects, or the next piece of text.</p></div>
+    <div class="card"><h4>How much data is there?</h4><p>Hundreds of rows suit a forest. Thousands of images need a CNN or a pretrained model. Tiny image sets need transfer learning.</p></div>
+  </div>
+
+  <h3 class="h">Decision map</h3>
+  <div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TD
+  A{{"What is the input?"}}
+  A --> T["Table: rows and columns"]
+  A --> P["Pixels flattened into CSV columns"]
+  A --> I["Image files"]
+  A --> X["Text or a sequence"]
+  T --> T1{"What do you predict?"}
+  T1 -->|"Yes/No or class, quick baseline"| L1["Lab 1: Random Forest"]
+  T1 -->|"Yes/No, want a neural net"| L3["Lab 3: FFNN"]
+  T1 -->|"A number"| L4["Lab 4: FFNN + BatchNorm + Dropout"]
+  P --> L2["Lab 2: MLP"]
+  I --> I1{"Need object locations?"}
+  I1 -->|"Yes, boxes"| L7["Lab 7: YOLO11"]
+  I1 -->|"No, one label per image"| I2{"Pretrained model fits the images?"}
+  I2 -->|"Yes or small dataset"| L6["Lab 6: ResNet18 transfer"]
+  I2 -->|"Learn from scratch"| L5["Lab 5: CNN from scratch"]
+  X --> L8["Lab 8: LSTM text generation"]
+</pre>
+  </div>
+
+  <h3 class="h">Match your problem statement</h3>
+  <p class="lede" style="margin-bottom:16px">Pick the kind of input you were given to see the labs that fit.</p>
+  <div class="chips" id="inputChips" role="group" aria-label="Filter by input type">
+    <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" type="button" data-f="table" aria-pressed="false">Table (CSV)</button>
+    <button class="chip" type="button" data-f="pixels" aria-pressed="false">Pixel CSV</button>
+    <button class="chip" type="button" data-f="images" aria-pressed="false">Image files</button>
+    <button class="chip" type="button" data-f="boxes" aria-pressed="false">Images with boxes</button>
+    <button class="chip" type="button" data-f="text" aria-pressed="false">Text</button>
+  </div>
+
+  <div class="grid" id="pcards">
+    <article class="card pcard" data-in="table">
+      <div class="num"><small>Lab</small>1</div>
+      <div>
+        <h4>Titanic: tabular binary classification</h4>
+        <q>Predict whether a passenger survived from their class, sex and family size.</q>
+        <dl><dt>Input</dt><dd>CSV with numeric and text columns</dd><dt>Output</dt><dd>0 or 1</dd><dt>Cues</dt><dd>"survived", "will the customer churn", "yes or no", mixed column types</dd><dt>Use</dt><dd>Random Forest</dd></dl>
+        <div class="links"><a href="#c-lab1" data-go="concepts:c-lab1">Concept</a><a href="#lab1">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="pixels">
+      <div class="num"><small>Lab</small>2</div>
+      <div>
+        <h4>Outfit prediction: multiclass on pixel rows</h4>
+        <q>Each row holds 784 pixel values of a clothing photo. Predict which of 10 outfit types it is.</q>
+        <dl><dt>Input</dt><dd>CSV where every column is one pixel (0 to 255)</dd><dt>Output</dt><dd>One of N classes</dd><dt>Cues</dt><dd>"fashion", "pixel1 ... pixel784", small grayscale images</dd><dt>Use</dt><dd>MLP</dd></dl>
+        <div class="links"><a href="#c-lab2" data-go="concepts:c-lab2">Concept</a><a href="#lab2">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="table">
+      <div class="num"><small>Lab</small>3</div>
+      <div>
+        <h4>Diabetes: binary classification with a neural net</h4>
+        <q>Given glucose, BMI, age and other measurements, predict whether the patient has diabetes.</q>
+        <dl><dt>Input</dt><dd>Small numeric table, 8 or so features</dd><dt>Output</dt><dd>0 or 1</dd><dt>Cues</dt><dd>"use a feedforward network", "tune hidden size and learning rate"</dd><dt>Use</dt><dd>FFNN</dd></dl>
+        <div class="links"><a href="#c-lab3" data-go="concepts:c-lab3">Concept</a><a href="#lab3">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="table">
+      <div class="num"><small>Lab</small>4</div>
+      <div>
+        <h4>Crab: regression</h4>
+        <q>Estimate the age of a crab from its length, weight and shell measurements. Scored by MAE.</q>
+        <dl><dt>Input</dt><dd>Numeric table plus one text column</dd><dt>Output</dt><dd>A continuous number</dd><dt>Cues</dt><dd>"how much", "how old", "price", "MAE or RMSE is the metric"</dd><dt>Use</dt><dd>FFNN with BatchNorm and Dropout</dd></dl>
+        <div class="links"><a href="#c-lab4" data-go="concepts:c-lab4">Concept</a><a href="#lab4">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="images">
+      <div class="num"><small>Lab</small>5</div>
+      <div>
+        <h4>Dog breed: multiclass images, CNN from scratch</h4>
+        <q>Identify the breed from a photo. 120 breeds, about 10,000 images.</q>
+        <dl><dt>Input</dt><dd>JPG files plus a labels CSV</dd><dt>Output</dt><dd>One of 120 classes</dd><dt>Cues</dt><dd>"build a CNN", "do not use pretrained weights"</dd><dt>Use</dt><dd>Conv, pool, dropout, augmentation</dd></dl>
+        <div class="links"><a href="#c-lab5" data-go="concepts:c-lab5">Concept</a><a href="#lab5">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="images">
+      <div class="num"><small>Lab</small>6</div>
+      <div>
+        <h4>Rock Paper Scissors: transfer learning</h4>
+        <q>Classify hand-gesture photos into 3 classes with a small dataset.</q>
+        <dl><dt>Input</dt><dd>Image folders, one folder per class</dd><dt>Output</dt><dd>One of N classes</dd><dt>Cues</dt><dd>"pretrained", "fine-tune", "few images", "ImageNet"</dd><dt>Use</dt><dd>ResNet18 with a new final layer</dd></dl>
+        <div class="links"><a href="#c-lab6" data-go="concepts:c-lab6">Concept</a><a href="#lab6">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="boxes">
+      <div class="num"><small>Lab</small>7</div>
+      <div>
+        <h4>Raccoon: object detection</h4>
+        <q>Find every raccoon in the picture and draw a box around it.</q>
+        <dl><dt>Input</dt><dd>Images plus YOLO label files and data.yaml</dd><dt>Output</dt><dd>Boxes, classes, confidences</dd><dt>Cues</dt><dd>"locate", "detect", "bounding box", "mAP"</dd><dt>Use</dt><dd>YOLO11</dd></dl>
+        <div class="links"><a href="#c-lab7" data-go="concepts:c-lab7">Concept</a><a href="#lab7">Code</a></div>
+      </div>
+    </article>
+    <article class="card pcard" data-in="text">
+      <div class="num"><small>Lab</small>8</div>
+      <div>
+        <h4>Text generation: character-level LSTM</h4>
+        <q>Train on Shakespeare and write new text from a seed word.</q>
+        <dl><dt>Input</dt><dd>One long text file</dd><dt>Output</dt><dd>Next character, repeated</dd><dt>Cues</dt><dd>"generate", "continue the text", "sequence", "perplexity"</dd><dt>Use</dt><dd>Embedding, LSTM, Linear</dd></dl>
+        <div class="links"><a href="#c-lab8" data-go="concepts:c-lab8">Concept</a><a href="#lab8">Code</a></div>
+      </div>
+    </article>
+  </div>
+
+  <h3 class="h">Words in a problem statement and what they mean</h3>
+  <div class="tw"><table>
+    <thead><tr><th>You read</th><th>It means</th><th>Output layer</th><th>Lab</th></tr></thead>
+    <tbody>
+      <tr><td>"Will it happen? Is it X or not?"</td><td>Binary classification</td><td>2 logits (or 1 with sigmoid)</td><td>1, 3</td></tr>
+      <tr><td>"Which of these N categories?"</td><td>Multiclass classification</td><td>N logits</td><td>2, 5, 6</td></tr>
+      <tr><td>"How much, how many, how old?"</td><td>Regression</td><td>1 number, no activation</td><td>4</td></tr>
+      <tr><td>"Where is the object?"</td><td>Object detection</td><td>Boxes + class per box</td><td>7</td></tr>
+      <tr><td>"Write or continue the text"</td><td>Sequence generation</td><td>Vocabulary-size logits per step</td><td>8</td></tr>
+      <tr><td>"Only a few hundred images"</td><td>Use a pretrained backbone</td><td>New final layer</td><td>6</td></tr>
+      <tr><td>"Metric is MAE / RMSE"</td><td>Regression loss should match the metric</td><td>1</td><td>4</td></tr>
+      <tr><td>"Metric is accuracy / F1"</td><td>Classification</td><td>N</td><td>1, 2, 3, 5, 6</td></tr>
+      <tr><td>"Metric is mAP"</td><td>Detection</td><td>Boxes</td><td>7</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ 2. CONCEPTS ============ -->
+<section class="view" id="v-concepts">
+  <header class="sec-head">
+    <span class="eyebrow">Step 2 of 6</span>
+    <h2>Choose the concept</h2>
+    <p class="lede">Once you know the problem type, pick the model. Each card says what the model is, when to reach for it, which settings matter, and what went wrong in the lab.</p>
+  </header>
+
+  <h3 class="h">Cheat sheet: task, output layer, loss, metric</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Task</th><th>Last layer</th><th>Loss</th><th>Metric</th><th>Labs</th></tr></thead>
+    <tbody>
+      <tr><td>Binary classification</td><td><code>Linear(h, 2)</code> logits</td><td><code>CrossEntropyLoss</code></td><td>Accuracy, F1</td><td>1, 3</td></tr>
+      <tr><td>Multiclass (PyTorch)</td><td><code>Linear(h, N)</code> logits, no softmax</td><td><code>CrossEntropyLoss</code></td><td>Accuracy</td><td>2, 6</td></tr>
+      <tr><td>Multiclass (Keras)</td><td><code>Dense(N, softmax)</code></td><td><code>sparse_categorical_crossentropy</code></td><td>Accuracy</td><td>5</td></tr>
+      <tr><td>Regression</td><td><code>Linear(h, 1)</code></td><td><code>L1Loss</code> for MAE, <code>MSELoss</code> for RMSE</td><td>MAE, RMSE</td><td>4</td></tr>
+      <tr><td>Detection</td><td>Built into YOLO</td><td>Box + class + DFL loss</td><td>Precision, recall, mAP50</td><td>7</td></tr>
+      <tr><td>Next-character generation</td><td><code>Linear(h, vocab)</code> per time step</td><td><code>CrossEntropyLoss</code></td><td>Perplexity = exp(loss)</td><td>8</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="h">The eight models</h3>
+
+  <details class="concept" id="c-lab1" open>
+    <summary><span class="n">Lab 1</span><b>Random Forest</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>Many decision trees, each trained on a random sample of rows and a random subset of features. The forest predicts by majority vote.</p></div>
+      <div><h5>Use when</h5><ul><li>Tabular data with mixed types</li><li>You want a strong baseline fast</li><li>No scaling needed, little tuning</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li><code>n_estimators</code>: number of trees (100 in the lab)</li><li><code>max_depth</code>: limits overfitting (5 in the lab)</li><li><code>min_samples_leaf</code>, <code>max_features</code></li></ul></div>
+      <div><h5>Watch out</h5><ul><li>Text columns need <code>get_dummies</code></li><li>Encode train and test together so columns match</li><li>Fill missing values before fitting</li></ul></div>
+      <div class="wide"><h5>Lab setting</h5><p>Features <code>Pclass, Sex, SibSp, Parch</code>, 100 trees, depth 5, <code>random_state=1</code>. Output saved as <code>PassengerId, Survived</code>.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab2">
+    <summary><span class="n">Lab 2</span><b>MLP on flattened images</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>A multi-layer perceptron: fully connected layers with a nonlinearity between them. Each pixel is one input feature, so the image's 2D layout is ignored.</p></div>
+      <div><h5>Use when</h5><ul><li>Small, centred, grayscale images (Fashion-MNIST style)</li><li>Data arrives as pixel columns in a CSV</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li><code>hidden_layer_sizes=(128, 64)</code></li><li><code>alpha</code>: L2 penalty</li><li><code>learning_rate_init</code>, <code>batch_size</code>, <code>max_iter</code></li><li><code>activation</code>: relu or tanh</li></ul></div>
+      <div><h5>Watch out</h5><ul><li>Divide pixels by 255 first</li><li>Hyperparameters were changed one at a time in the lab</li></ul></div>
+      <div class="wide"><h5>What the tuning showed</h5><p>About 95% validation accuracy at 50 iterations. Raising <code>alpha</code> to 0.001 lowered accuracy, changing the learning rate either way lowered it, batch size 128 dropped it to about 94%, tanh was about 0.1% worse, and <code>(256, 128)</code> was slightly better. Final choice: <code>(128, 64)</code>, relu, adam, <code>alpha=1e-4</code>, batch 64, lr 1e-3, <code>max_iter=150</code>.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab3">
+    <summary><span class="n">Lab 3</span><b>Feedforward neural network (FFNN)</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>Stacked <code>Linear → ReLU → Dropout</code> layers written in PyTorch. Training repeats four steps: forward pass, loss, <code>backward()</code>, optimizer step.</p></div>
+      <div><h5>Use when</h5><ul><li>Small numeric tables</li><li>You are asked to build and tune a network yourself</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Hidden sizes (4 to 32 tried)</li><li>Learning rate (0.001 to 0.05 tried)</li><li>Dropout 0.3, weight decay 1e-4, epochs</li></ul></div>
+      <div><h5>Watch out</h5><ul><li>Standardize features, fitting the scaler on train only</li><li>Zeros in Glucose, BMI and similar columns mean "missing"</li><li>Load the test CSV from the test file</li></ul></div>
+      <div class="wide"><h5>Lab setting</h5><p>Two hidden layers (8, 4), lr 0.001, Adam, 300 epochs, full-batch training, 80/20 stratified split. The sweeps over hidden size and learning rate were plotted as accuracy curves.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab4">
+    <summary><span class="n">Lab 4</span><b>FFNN with BatchNorm and Dropout (regression)</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>A deeper FFNN for predicting a number. BatchNorm re-centres each layer's activations so training is stable. Dropout switches off random units to reduce overfitting.</p></div>
+      <div><h5>Use when</h5><ul><li>Target is continuous</li><li>You want the loss to equal the competition metric</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Layers (256, 128, 64), SiLU activation</li><li>Dropout 0.15, AdamW, weight decay 1e-4</li><li>Cosine learning-rate schedule, patience 12</li></ul></div>
+      <div><h5>Techniques used</h5><ul><li>5-fold cross-validation, test predictions averaged</li><li>Scaler fit inside each fold</li><li>Output bias started at the mean target</li><li>Ratio and volume features added by hand</li></ul></div>
+      <div class="wide"><h5>Watch out</h5><p>The model output has shape <code>(N, 1)</code>. Squeeze it so it matches targets of shape <code>(N,)</code>. Call <code>model.eval()</code> before predicting, because BatchNorm and Dropout behave differently in eval mode.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab5">
+    <summary><span class="n">Lab 5</span><b>CNN trained from scratch</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>Convolution layers slide small filters over the image to find edges, then textures, then parts. Pooling halves the width and height. A final dense layer maps features to classes.</p></div>
+      <div><h5>Use when</h5><ul><li>Images, and a pretrained model is not allowed or not helpful</li><li>You want to learn how CNNs work</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Image size (160), filters per block (32, 64, ...)</li><li>Dropout 0.2 to 0.5</li><li>Augmentation: flip, rotate, zoom, shift</li><li>Callbacks: EarlyStopping, ReduceLROnPlateau</li></ul></div>
+      <div><h5>Watch out</h5><ul><li>Stratified 60/20/20 split so all 120 breeds are in every split</li><li>Flatten into a Dense layer is huge (26 million parameters in the lab)</li></ul></div>
+      <div class="wide"><h5>What happened in the lab</h5><p>Loss stayed at 4.79, which is <code>ln(120)</code>, so the model was guessing uniformly (test accuracy 1.03%). With 120 classes and about 6,000 training images, a plain two-block CNN is hard to train. The code in step 3 adds BatchNorm and global average pooling to fix this. Details are in the errors section.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab6">
+    <summary><span class="n">Lab 6</span><b>Transfer learning with ResNet18</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>ResNet18 was trained on ImageNet (1.2 million images). Its early layers already detect edges and shapes. You freeze them and train only a new final layer for your classes.</p></div>
+      <div><h5>Use when</h5><ul><li>Small image dataset</li><li>You need good accuracy quickly</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Input 224 x 224, ImageNet mean and std</li><li>Frozen backbone: only 2,052 of 11 million parameters train (4 classes)</li><li>Adam on <code>model.fc.parameters()</code>, StepLR</li></ul></div>
+      <div><h5>Next step</h5><ul><li>Unfreeze <code>layer4</code> with a lower learning rate (1e-4 or less)</li></ul></div>
+      <div class="wide"><h5>What happened in the lab</h5><p>Accuracy stayed at 50% and the model had 4 outputs for a 3-class problem. The dataset path pointed one folder too high, so <code>ImageFolder</code> treated the nested folder <code>rps-cv-images</code> as a fourth class and counted every image twice (4,376 instead of 2,188). Training and validation also used the same images. The code in step 3 fixes both.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab7">
+    <summary><span class="n">Lab 7</span><b>YOLO11 object detection</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>A single-stage detector. One pass over the image predicts boxes, classes and confidences. Labels are text files with <code>class x_center y_center width height</code>, all scaled to 0 to 1.</p></div>
+      <div><h5>Use when</h5><ul><li>You need locations, not just a label</li><li>Dataset comes with a <code>data.yaml</code></li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Model size: <code>yolo11n</code> (nano) to <code>yolo11x</code></li><li><code>imgsz=640</code>, <code>epochs=30</code>, <code>batch=16</code></li><li><code>freeze=10</code>: keep the first 10 layers fixed</li><li><code>patience=10</code>: early stopping</li></ul></div>
+      <div><h5>Metrics</h5><ul><li>Precision: of the boxes drawn, how many were right</li><li>Recall: of the real objects, how many were found</li><li>mAP50: average precision at IoU 0.5</li><li>mAP50-95: stricter, averaged over IoU 0.5 to 0.95</li></ul></div>
+      <div class="wide"><h5>What happened in the lab</h5><p>Test results: precision 0.962, recall 0.307, mAP50 0.448, mAP50-95 0.246. Raccoon reached AP50 0.878. Cat, Dog and Human were weak because the training set had 6, 5 and 25 boxes for them against 247 for raccoon. Detection quality follows the number of examples per class.</p></div>
+    </div>
+  </details>
+
+  <details class="concept" id="c-lab8">
+    <summary><span class="n">Lab 8</span><b>LSTM text generation</b></summary>
+    <div class="cbody">
+      <div><h5>What it is</h5><p>An LSTM reads characters one at a time and keeps a memory (hidden state). At every step it predicts the next character. The target is the input shifted by one position.</p></div>
+      <div><h5>Use when</h5><ul><li>Data is a sequence and order matters</li><li>The task is to generate, continue or predict the next item</li></ul></div>
+      <div><h5>Settings that matter</h5><ul><li>Sequence length 100, stride 5, batch 128</li><li>Embedding 128, hidden 256</li><li>Adam lr 2e-3, cosine schedule, gradient clipping 1.0</li><li>Sampling <code>temperature</code></li></ul></div>
+      <div><h5>Reading the output</h5><ul><li>Low temperature (0.4): safe, repetitive text</li><li>High temperature (1.2): creative, more mistakes</li><li>Perplexity = exp(validation loss)</li></ul></div>
+      <div class="wide"><h5>Lab setting</h5><p>Tiny Shakespeare, 1,115,394 characters, 65 unique characters, 420,289 parameters, 10 epochs, best validation weights restored at the end.</p></div>
+    </div>
+  </details>
+
+  <h3 class="h">Building blocks you meet in every lab</h3>
+  <div class="grid g3">
+    <div class="card gl"><b>Train / validation / test split</b>Train fits the weights. Validation picks settings. Test is touched once at the end. Use <code>stratify=y</code> for classification.</div>
+    <div class="card gl"><b>Standardization</b>Subtract the mean and divide by the std, using numbers from the training set only. Needed for neural nets, not for forests.</div>
+    <div class="card gl"><b>One-hot encoding</b>Turns a text category into 0/1 columns with <code>pd.get_dummies</code>. Do it on train and test together.</div>
+    <div class="card gl"><b>Epoch, batch, learning rate</b>An epoch is one pass over the data. A batch is the slice used per weight update. The learning rate is the step size.</div>
+    <div class="card gl"><b>Adam and AdamW</b>Optimizers that adapt the step per weight. AdamW applies weight decay correctly. Adam at 1e-3 is a safe start.</div>
+    <div class="card gl"><b>LR schedulers</b>StepLR drops the rate every k epochs. CosineAnnealing glides it down. ReduceLROnPlateau cuts it when validation stalls.</div>
+    <div class="card gl"><b>Overfitting</b>Train score keeps improving while validation gets worse. Fix with dropout, augmentation, weight decay, early stopping, more data.</div>
+    <div class="card gl"><b>Dropout and BatchNorm</b>Dropout randomly zeroes units during training. BatchNorm normalizes layer inputs. Both behave differently in <code>eval()</code> mode.</div>
+    <div class="card gl"><b>Softmax and cross-entropy</b>Softmax turns logits into probabilities. Cross-entropy punishes a low probability on the true class. PyTorch's loss includes the softmax.</div>
+  </div>
+</section>
+
+<!-- ============ 3. CODE ============ -->
+<section class="view" id="v-code">
+  <header class="sec-head">
+    <span class="eyebrow">Step 3 of 6</span>
+    <h2>Reusable code, lab by lab</h2>
+    <p class="lede">Every block starts with a settings section in capitals. Change those paths and column names, and the rest runs on a new dataset of the same type. Blocks are in the order you run them.</p>
+  </header>
+
+  <div class="labnav" id="labnav" role="group" aria-label="Choose a lab">
+    <button type="button" data-lab="1" aria-pressed="true"><b>L1</b> Titanic <span>Random Forest</span></button>
+    <button type="button" data-lab="2" aria-pressed="false"><b>L2</b> Outfit <span>MLP</span></button>
+    <button type="button" data-lab="3" aria-pressed="false"><b>L3</b> Diabetes <span>FFNN</span></button>
+    <button type="button" data-lab="4" aria-pressed="false"><b>L4</b> Crab <span>Regression</span></button>
+    <button type="button" data-lab="5" aria-pressed="false"><b>L5</b> Dog Breed <span>CNN</span></button>
+    <button type="button" data-lab="6" aria-pressed="false"><b>L6</b> RPS <span>ResNet18</span></button>
+    <button type="button" data-lab="7" aria-pressed="false"><b>L7</b> Raccoon <span>YOLO11</span></button>
+    <button type="button" data-lab="8" aria-pressed="false"><b>L8</b> Text <span>LSTM</span></button>
+  </div>
+
+  <!-- LAB 1 -->
+  <article class="lab on" id="lab1">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Tabular</span><span class="tag">Binary classification</span><span class="tag neutral">scikit-learn</span></div>
+      <h3>Lab 1: Titanic with a Random Forest</h3>
+      <p class="lede">Use for any CSV where you predict a category from a handful of columns. This is the baseline to beat before trying a neural net.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li><code>TRAIN_CSV</code>, <code>TEST_CSV</code>: file paths (find them with the folder-listing cell in the Kaggle &amp; Colab section)</li>
+      <li><code>TARGET</code>, <code>ID_COL</code>: the column to predict and the id column the submission needs</li>
+      <li><code>FEATURES</code>: the columns to use. Add more once missing values are handled</li></ul></div>
+    <div class="cb" data-src="l1a" data-title="1 · Load data"></div>
+    <div class="cb" data-src="l1b" data-title="2 · Fill missing values and encode text columns"></div>
+    <div class="cb" data-src="l1c" data-title="3 · Train, validate, check feature importance"></div>
+    <div class="cb" data-src="l1d" data-title="4 · Refit on all data and write submission.csv"></div>
+    <div class="callout info lab-note"><b>Lab result:</b> 100 trees, depth 5 on <code>Pclass, Sex, SibSp, Parch</code>. Adding Age, Fare and Embarked (after filling missing values) is the usual next gain.</div>
+  </article>
+
+  <!-- LAB 2 -->
+  <article class="lab" id="lab2">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Pixel CSV</span><span class="tag">Multiclass</span><span class="tag neutral">scikit-learn MLP</span></div>
+      <h3>Lab 2: Outfit prediction with an MLP</h3>
+      <p class="lede">Use when each image arrives as one row of pixel columns. Scale to 0 to 1, fit an MLP, then change one setting at a time.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li>File paths, <code>TARGET</code> and <code>ID_COL</code></li>
+      <li>The divisor <code>255.0</code> if pixels use another range</li>
+      <li><code>hidden_layer_sizes</code> and <code>max_iter</code>. Larger images need wider layers</li></ul></div>
+    <div class="cb" data-src="l2a" data-title="1 · Load and look at an image"></div>
+    <div class="cb" data-src="l2b" data-title="2 · Scale and split"></div>
+    <div class="cb" data-src="l2c" data-title="3 · Train the MLP and read the loss curve"></div>
+    <div class="cb" data-src="l2d" data-title="4 · Tune one setting at a time"></div>
+    <div class="cb" data-src="l2e" data-title="5 · Confusion matrix and submission.csv"></div>
+    <div class="cb" data-src="l2f" data-title="Optional · The same MLP in PyTorch"></div>
+    <div class="callout info lab-note"><b>Lab result:</b> about 95% validation accuracy. Every change in the tuning loop moved accuracy by 1% or less, so the first reasonable setting was already close to the best this model can do.</div>
+  </article>
+
+  <!-- LAB 3 -->
+  <article class="lab" id="lab3">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Tabular</span><span class="tag">Binary classification</span><span class="tag neutral">PyTorch</span></div>
+      <h3>Lab 3: Diabetes with a feedforward network</h3>
+      <p class="lede">A small neural net on numeric features. Includes the hidden-size and learning-rate sweeps from the lab.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li>Paths, <code>FEATURES</code>, <code>TARGET</code>, <code>ID_COL</code></li>
+      <li><code>ZERO_IS_MISSING</code>: columns where 0 really means "not measured". Use <code>[]</code> if none</li>
+      <li>Hidden sizes and learning rate (use the sweep to choose)</li></ul></div>
+    <div class="cb" data-src="l3a" data-title="1 · Seed, load, clean, split, scale, make tensors"></div>
+    <div class="cb" data-src="l3b" data-title="2 · Model and training function"></div>
+    <div class="cb" data-src="l3c" data-title="3 · Sweep hidden size and learning rate"></div>
+    <div class="cb" data-src="l3d" data-title="4 · Final model, curves and submission.csv"></div>
+    <div class="callout warn lab-note"><b>Fixed from the lab:</b> the lab notebook loaded <code>train.csv</code> twice, so the "test" predictions came from training rows. Here the test file is loaded from <code>TEST_CSV</code>. The lab also trained on the whole training set in one batch per epoch; this version uses mini-batches, which is the standard way and works the same on small data.</div>
+  </article>
+
+  <!-- LAB 4 -->
+  <article class="lab" id="lab4">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Tabular</span><span class="tag">Regression</span><span class="tag neutral">PyTorch</span></div>
+      <h3>Lab 4: Crab age with BatchNorm and Dropout</h3>
+      <p class="lede">Regression with a deeper network, 5-fold cross-validation and an averaged ensemble of the five fold models.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li><code>TARGET</code>, the id column, and the file names</li>
+      <li><code>build_features</code>: replace the crab ratios with features that make sense for your columns</li>
+      <li>Loss: <code>L1Loss</code> if the metric is MAE, <code>MSELoss</code> if RMSE</li></ul></div>
+    <div class="cb" data-src="l4a" data-title="1 · Setup and data"></div>
+    <div class="cb" data-src="l4b" data-title="2 · Feature engineering and one-hot encoding"></div>
+    <div class="cb" data-src="l4c" data-title="3 · Model with BatchNorm and Dropout"></div>
+    <div class="cb" data-src="l4d" data-title="4 · Training function with early stopping"></div>
+    <div class="cb" data-src="l4e" data-title="5 · Cross-validation loop and submission.csv"></div>
+    <div class="callout info lab-note"><b>Why these choices:</b> the scaler is fitted inside each fold so validation rows never leak into it. The last layer's bias starts at the mean target so the first epochs do not waste time finding the scale. Predictions are clipped to the range seen in training.</div>
+  </article>
+
+  <!-- LAB 5 -->
+  <article class="lab" id="lab5">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Image files + CSV</span><span class="tag">Multiclass</span><span class="tag neutral">TensorFlow / Keras</span></div>
+      <h3>Lab 5: Dog breed with a CNN from scratch</h3>
+      <p class="lede">A reusable image pipeline (paths in a DataFrame, stratified split, tf.data) and a CNN you can scale up or down.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li><code>BASE_DIR</code>, the labels file, and the label column name</li>
+      <li><code>IMG_SIZE</code>: smaller trains faster, larger sees more detail</li>
+      <li>The list of filters in the model. Add a block for more capacity</li></ul></div>
+    <div class="cb" data-src="l5a" data-title="1 · Labels, file paths, stratified 60/20/20 split"></div>
+    <div class="cb" data-src="l5b" data-title="2 · tf.data input pipeline"></div>
+    <div class="cb" data-src="l5c" data-title="3 · CNN with augmentation, BatchNorm and global pooling"></div>
+    <div class="cb" data-src="l5d" data-title="4 · Train, plot, evaluate"></div>
+    <div class="cb" data-src="l5e" data-title="5 · Predictions and Kaggle submission"></div>
+    <div class="callout warn lab-note"><b>What changed from the lab:</b> the lab model flattened a 40 x 40 x 64 map into a 256-unit dense layer (26 million parameters) with no BatchNorm. It stayed at loss 4.79 (<code>ln 120</code>) and reached 1.03% test accuracy. The version here uses BatchNorm after every convolution and global average pooling instead of Flatten, which cuts the parameters to about 1.3 million and lets the loss move. If accuracy is still low, try a pretrained backbone (Lab 6's idea in Keras: <code>keras.applications.ResNet50</code>, <code>include_top=False</code>).</div>
+  </article>
+
+  <!-- LAB 6 -->
+  <article class="lab" id="lab6">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Image folders</span><span class="tag">Multiclass</span><span class="tag neutral">PyTorch + torchvision</span></div>
+      <h3>Lab 6: Rock Paper Scissors with ResNet18</h3>
+      <p class="lede">Transfer learning on any dataset laid out as <code>root/class_name/image.jpg</code>.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li><code>DATA_DIR</code> must be the folder whose direct children are the class folders</li>
+      <li>Print <code>class_to_idx</code> and check it lists only your real classes</li>
+      <li>Epochs and learning rates. Everything else is generic</li></ul></div>
+    <div class="cb" data-src="l6a" data-title="1 · Dataset, class check, train/val split with separate transforms"></div>
+    <div class="cb" data-src="l6b" data-title="2 · Load ResNet18, freeze, replace the final layer"></div>
+    <div class="cb" data-src="l6c" data-title="3 · Training loop that keeps the best weights"></div>
+    <div class="cb" data-src="l6d" data-title="4 · Optional fine-tuning, single-image prediction, save"></div>
+    <div class="callout warn lab-note"><b>Fixed from the lab:</b> (1) the lab's path included the parent folder, creating a phantom fourth class and doubling the data; (2) the training and validation sets were the same images, so validation numbers meant little; (3) <code>state_dict().copy()</code> makes a shallow copy that keeps changing as training continues, so the "best" weights were not the best. This code uses a real split and <code>copy.deepcopy</code>.</div>
+  </article>
+
+  <!-- LAB 7 -->
+  <article class="lab" id="lab7">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Images + box labels</span><span class="tag">Object detection</span><span class="tag neutral">Ultralytics YOLO11</span></div>
+      <h3>Lab 7: Raccoon detection with YOLO11</h3>
+      <p class="lede">Fine-tune a COCO-pretrained detector on any dataset exported in YOLO format (images, label .txt files, data.yaml).</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li>Nothing in the paths if the dataset has a <code>data.yaml</code>. The code finds it</li>
+      <li>Model size: <code>yolo11n.pt</code> (fast) up to <code>yolo11s.pt</code> or <code>yolo11m.pt</code></li>
+      <li><code>epochs</code>, <code>imgsz</code>, <code>batch</code>, <code>freeze</code></li>
+      <li>Labels from Pascal VOC XML or COCO JSON must be converted to YOLO txt first (Roboflow does this)</li></ul></div>
+    <div class="cb" data-src="l7a" data-title="1 · Install, find data.yaml, copy to a writable folder, rewrite paths"></div>
+    <div class="cb" data-src="l7b" data-title="2 · Inspect class balance and draw ground-truth boxes"></div>
+    <div class="cb" data-src="l7c" data-title="3 · Baseline, then fine-tune"></div>
+    <div class="cb" data-src="l7d" data-title="4 · Evaluate, predict, export"></div>
+    <div class="callout info lab-note"><b>Lab result (test set):</b> precision 0.962, recall 0.307, mAP50 0.448, mAP50-95 0.246. Raccoon AP50 was 0.878. The other classes had under 30 training boxes. To improve them, add images for those classes, lower <code>conf</code> at prediction time, or train more epochs without freezing.</div>
+  </article>
+
+  <!-- LAB 8 -->
+  <article class="lab" id="lab8">
+    <div class="lab-head">
+      <div class="tags"><span class="tag">Text</span><span class="tag">Sequence generation</span><span class="tag neutral">PyTorch</span></div>
+      <h3>Lab 8: Character-level LSTM</h3>
+      <p class="lede">Train on any plain-text file and generate new text from a seed. For word-level generation, swap characters for words in the vocabulary step.</p>
+    </div>
+    <div class="adapt"><h4>Change these for a new dataset</h4><ul>
+      <li><code>CORPUS_URL</code> or a local <code>.txt</code> file</li>
+      <li><code>SEQ_LEN</code>, <code>STRIDE</code>, <code>HIDDEN_DIM</code> (larger = better text, slower)</li>
+      <li>Use temperature 0.5 to 1.0 when generating</li></ul></div>
+    <div class="cb" data-src="l8a" data-title="1 · Load text and build the character vocabulary"></div>
+    <div class="cb" data-src="l8b" data-title="2 · Sliding-window dataset and loaders"></div>
+    <div class="cb" data-src="l8c" data-title="3 · Model"></div>
+    <div class="cb" data-src="l8d" data-title="4 · Train with gradient clipping and keep the best weights"></div>
+    <div class="cb" data-src="l8e" data-title="5 · Generate text with temperature"></div>
+    <div class="callout info lab-note"><b>Why the target is shifted:</b> for input characters <code>c[0..99]</code> the label is <code>c[1..100]</code>. The loss at each position asks "given everything so far, what comes next?". Reshaping logits to <code>[B*T, V]</code> lets one <code>CrossEntropyLoss</code> call score every position.</div>
+  </article>
+</section>
+
+<!-- ============ 4. REFERENCES ============ -->
+<section class="view" id="v-refs">
+  <header class="sec-head">
+    <span class="eyebrow">Step 4 of 6</span>
+    <h2>Further reading</h2>
+    <p class="lede">Official documentation first, then tutorials and papers. Links open in a new tab.</p>
+  </header>
+  <div id="refsMount"></div>
+</section>
+
+<!-- ============ 5. RUN ============ -->
+<section class="view" id="v-run">
+  <header class="sec-head">
+    <span class="eyebrow">Step 5 of 6</span>
+    <h2>Run the labs on Kaggle or Colab</h2>
+    <p class="lede">Both give you a free GPU in the browser. Kaggle is easiest when the data is a Kaggle competition. Colab is easiest when the files are on your computer or Google Drive.</p>
+  </header>
+
+  <div class="tw"><table>
+    <thead><tr><th></th><th>Kaggle Notebooks</th><th>Google Colab</th></tr></thead>
+    <tbody>
+      <tr><td><b>Data</b></td><td>Attach with <b>Add Input</b>. Appears under <code>/kaggle/input/</code> (read-only)</td><td>Upload, mount Drive, or download with the Kaggle API. Lives under <code>/content/</code></td></tr>
+      <tr><td><b>Write files to</b></td><td><code>/kaggle/working/</code></td><td><code>/content/</code> (deleted when the session ends)</td></tr>
+      <tr><td><b>GPU</b></td><td>Settings, Accelerator: GPU T4 x2 or P100. Weekly quota, see your profile</td><td>Runtime, Change runtime type, T4 GPU. Limits vary and are not guaranteed</td></tr>
+      <tr><td><b>Internet</b></td><td>Off by default. Turn on in Settings (phone verification needed)</td><td>On</td></tr>
+      <tr><td><b>Submit</b></td><td>Direct from the competition page or from the notebook output</td><td>Download the CSV and upload it, or use the Kaggle CLI</td></tr>
+      <tr><td><b>Preinstalled</b></td><td>PyTorch, TensorFlow, scikit-learn, pandas</td><td>Same, plus <code>google.colab</code> helpers</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="h">Kaggle, step by step</h3>
+  <div class="grid g2">
+    <div class="card"><h4>1. Create the notebook</h4><p>Kaggle, <b>Code</b>, <b>New Notebook</b>. To reuse a lab notebook, choose <b>File, Import Notebook</b> and upload the <code>.ipynb</code>.</p></div>
+    <div class="card"><h4>2. Join the competition</h4><p>Open the competition page and press <b>Join</b>, then accept the rules. Without this the data folder stays empty or downloads fail.</p></div>
+    <div class="card"><h4>3. Add the data</h4><p>In the notebook press <b>Add Input</b>, search for the competition or dataset, then <b>Add</b>. Run the folder-listing cell below to get the exact path.</p></div>
+    <div class="card"><h4>4. Turn on the accelerator</h4><p>Right panel, <b>Session options</b> (or Settings), <b>Accelerator</b>, choose a GPU. Changing it restarts the session, so do it before running anything.</p></div>
+    <div class="card"><h4>5. Turn on Internet if needed</h4><p>Required for Lab 6 (ResNet weights), Lab 7 (<code>pip install ultralytics</code> and <code>yolo11n.pt</code>) and Lab 8 (corpus download). Needs a verified phone number.</p></div>
+    <div class="card"><h4>6. Run and submit</h4><p>Run all cells. The file <code>submission.csv</code> appears under <code>/kaggle/working</code>. Submit it from the competition's <b>Submit Predictions</b> page or from the notebook's <b>Output</b> tab after <b>Save Version</b>.</p></div>
+  </div>
+
+  <h3 class="h">Colab, step by step</h3>
+  <div class="grid g2">
+    <div class="card"><h4>1. Open a notebook</h4><p>Go to colab.research.google.com, <b>File, Upload notebook</b>, and choose the <code>.ipynb</code>.</p></div>
+    <div class="card"><h4>2. Pick the GPU</h4><p><b>Runtime, Change runtime type</b>, hardware accelerator <b>T4 GPU</b>, Save. Check with the first cell below.</p></div>
+    <div class="card"><h4>3. Bring the data in</h4><p>Small CSV: the folder icon on the left, then Upload. Larger data: mount Google Drive or use the Kaggle API (cells below).</p></div>
+    <div class="card"><h4>4. Change the paths</h4><p>Replace <code>/kaggle/input/...</code> with <code>/content/...</code>. Use the path cell below once at the top and use <code>DATA_ROOT</code> everywhere.</p></div>
+    <div class="card"><h4>5. Keep your work</h4><p>Save checkpoints and <code>submission.csv</code> to Drive. A disconnected session deletes everything under <code>/content</code>.</p></div>
+    <div class="card"><h4>6. Submit</h4><p>Download <code>submission.csv</code> and upload it on the competition page, or use the CLI command below.</p></div>
+  </div>
+
+  <h3 class="h">Cells to paste at the top</h3>
+  <div class="cb" data-src="r1" data-title="Which platform am I on, and do I have a GPU?"></div>
+  <div class="cb" data-src="r2" data-title="List the files you can read (gives you the exact paths)"></div>
+  <div class="cb" data-src="r6" data-title="One cell that works on both platforms"></div>
+  <div class="cb" data-src="r3" data-title="Colab: download Kaggle data with the Kaggle API"></div>
+  <div class="cb" data-src="r4" data-title="Colab: mount Google Drive and save checkpoints"></div>
+  <div class="cb" data-src="r5" data-title="Colab: submit to a competition from the notebook"></div>
+  <div class="callout info">If Kaggle's Settings page shows a different API token format than a <code>kaggle.json</code> file, follow the instructions printed there. The command-line calls stay the same.</div>
+
+  <h3 class="h">What each lab needs</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Lab</th><th>GPU</th><th>Internet (Kaggle)</th><th>Data source</th><th>Rough run time</th></tr></thead>
+    <tbody>
+      <tr><td>1 Titanic</td><td>No</td><td>No</td><td>Competition <code>titanic</code></td><td>Seconds</td></tr>
+      <tr><td>2 Outfit</td><td>No</td><td>No</td><td>Class competition (pixel CSV)</td><td>1 to 5 minutes</td></tr>
+      <tr><td>3 Diabetes</td><td>No</td><td>No</td><td>Class competition (CSV)</td><td>1 to 3 minutes</td></tr>
+      <tr><td>4 Crab</td><td>Helpful</td><td>No</td><td>Playground competition (CSV)</td><td>5 to 20 minutes (5 folds)</td></tr>
+      <tr><td>5 Dog breed</td><td>Yes</td><td>No</td><td>Competition <code>dog-breed-identification</code></td><td>20 to 60 minutes</td></tr>
+      <tr><td>6 RPS</td><td>Yes</td><td>Yes (weights)</td><td>Dataset <code>drgfreeman/rockpaperscissors</code></td><td>5 to 10 minutes</td></tr>
+      <tr><td>7 Raccoon</td><td>Yes</td><td>Yes (pip + weights)</td><td>Dataset with <code>data.yaml</code></td><td>5 to 15 minutes</td></tr>
+      <tr><td>8 LSTM</td><td>Yes</td><td>Yes, or attach a .txt dataset</td><td>Tiny Shakespeare text</td><td>10 to 30 minutes</td></tr>
+    </tbody>
+  </table></div>
+  <p class="lede" style="font-size:.9rem">Run times are rough guides for a T4-class GPU and depend on the settings you choose.</p>
+</section>
+
+<!-- ============ 6. ERRORS ============ -->
+<section class="view" id="v-errors">
+  <header class="sec-head">
+    <span class="eyebrow">Step 6 of 6</span>
+    <h2>Common errors and how to fix them</h2>
+    <p class="lede">Find the message you see, read why it happens, then apply the fix. Entries marked <span class="tag">From the labs</span> are mistakes that actually appeared in these eight notebooks.</p>
+  </header>
+  <div class="callout ok"><b>Debug in this order:</b> (1) print shapes and class counts, (2) train on 32 samples and check the loss drops to near 0, (3) only then train on everything. If a tiny set cannot be memorized, the bug is in the data or the code, not in the settings.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin:0 0 14px">
+    <label for="errSearch" style="position:absolute;left:-9999px">Search errors</label>
+    <input id="errSearch" type="search" placeholder="Search an error message or keyword" style="flex:1 1 260px;min-width:0;font:inherit;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)">
+  </div>
+  <div class="chips" id="errChips" role="group" aria-label="Filter by category"></div>
+  <p id="errCount" style="color:var(--muted);font-size:.9rem;margin-bottom:12px"></p>
+  <div id="errList"></div>
+</section>
+
+  </main>
+</div>
+
+
+<!-- ===== code sources, labs 1-4 ===== -->
+<script type="text/plain" id="l1a">
+import numpy as np, pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+TRAIN_CSV = "/kaggle/input/competitions/titanic/train.csv"   # Colab: "/content/train.csv"
+TEST_CSV  = "/kaggle/input/competitions/titanic/test.csv"
+TARGET    = "Survived"        # column to predict
+ID_COL    = "PassengerId"     # column the submission file needs
+FEATURES  = ["Pclass", "Sex", "SibSp", "Parch"]   # start small, add more later
+# ====================================================
+
+train = pd.read_csv(TRAIN_CSV)
+test  = pd.read_csv(TEST_CSV)
+print(train.shape, test.shape)
+print(train[FEATURES + [TARGET]].isna().sum())     # where are the missing values?
+print(train[TARGET].value_counts(normalize=True))  # is the target balanced?
+</script>
+
+<script type="text/plain" id="l1b">
+# Stack train and test so both get exactly the same columns after encoding
+X_all = pd.concat([train[FEATURES], test[FEATURES]], keys=["train", "test"])
+
+# Fill missing values using statistics from the TRAIN rows only
+for c in FEATURES:
+    if X_all[c].dtype == "object":
+        fill = X_all.loc["train", c].mode()[0]       # most common text value
+    else:
+        fill = X_all.loc["train", c].median()        # middle numeric value
+    X_all[c] = X_all[c].fillna(fill)
+
+X_all = pd.get_dummies(X_all, dtype=int)             # text column -> 0/1 columns
+
+X      = X_all.loc["train"]
+X_test = X_all.loc["test"]
+y      = train[TARGET]
+print(X.shape, X_test.shape, list(X.columns))
+</script>
+
+<script type="text/plain" id="l1c">
+X_tr, X_val, y_tr, y_val = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42)
+
+model = RandomForestClassifier(
+    n_estimators=100,      # number of trees
+    max_depth=5,           # shallower = less overfitting
+    min_samples_leaf=2,
+    n_jobs=-1,
+    random_state=1)
+model.fit(X_tr, y_tr)
+
+pred = model.predict(X_val)
+print("Validation accuracy:", round(accuracy_score(y_val, pred), 4))
+print(classification_report(y_val, pred))
+print(confusion_matrix(y_val, pred))
+print("5-fold CV accuracy :", cross_val_score(model, X, y, cv=5).mean().round(4))
+
+# Which columns does the forest rely on?
+imp = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)
+print(imp)
+</script>
+
+<script type="text/plain" id="l1d">
+# Refit on ALL labelled rows, then predict the test file
+model.fit(X, y)
+predictions = model.predict(X_test)
+
+output = pd.DataFrame({ID_COL: test[ID_COL], TARGET: predictions})
+output.to_csv("submission.csv", index=False)       # Kaggle: saved in /kaggle/working
+print(output.shape); output.head()
+</script>
+
+<!-- ========== LAB 2 ========== -->
+<script type="text/plain" id="l2a">
+import numpy as np, pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+TRAIN_CSV = "/kaggle/input/competitions/outfit-prediction-c-1-fall-26-27/fashion_train.csv"
+TEST_CSV  = "/kaggle/input/competitions/outfit-prediction-c-1-fall-26-27/fashion_test.csv"
+TARGET    = "target"
+ID_COL    = "Id"
+# ====================================================
+
+train = pd.read_csv(TRAIN_CSV)
+test  = pd.read_csv(TEST_CSV)
+X      = train.drop(columns=[ID_COL, TARGET])
+y      = train[TARGET]
+X_test = test.drop(columns=[ID_COL])
+print(X.shape, X_test.shape)
+print(y.value_counts().sort_index())
+
+# Look at one image: 784 pixels -> 28 x 28
+side = int(np.sqrt(X.shape[1]))
+plt.imshow(X.iloc[0].values.reshape(side, side), cmap="gray")
+plt.title(f"label = {y.iloc[0]}"); plt.axis("off"); plt.show()
+</script>
+
+<script type="text/plain" id="l2b">
+print("pixel range:", X.values.min(), "to", X.values.max())   # expect 0 to 255
+X      = X / 255.0          # scale to 0..1, MLPs train badly on 0..255
+X_test = X_test / 255.0     # the SAME scaling for the test file
+
+X_tr, X_val, y_tr, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y)
+</script>
+
+<script type="text/plain" id="l2c">
+model = MLPClassifier(
+    hidden_layer_sizes=(128, 64),   # two hidden layers
+    activation="relu",
+    solver="adam",
+    alpha=1e-4,                     # L2 regularization
+    batch_size=64,
+    learning_rate_init=1e-3,
+    max_iter=150,                   # epochs
+    random_state=42)
+model.fit(X_tr, y_tr)
+
+pred = model.predict(X_val)
+print("Validation accuracy:", round(accuracy_score(y_val, pred), 4))
+
+plt.plot(model.loss_curve_); plt.xlabel("epoch"); plt.ylabel("training loss")
+plt.title("MLP loss curve"); plt.show()
+</script>
+
+<script type="text/plain" id="l2d">
+# Change ONE setting per run, keep a log of the result
+def try_cfg(**kw):
+    base = dict(hidden_layer_sizes=(128, 64), activation="relu", solver="adam",
+                alpha=1e-4, batch_size=64, learning_rate_init=1e-3,
+                max_iter=50, random_state=42)       # short runs while exploring
+    base.update(kw)
+    m = MLPClassifier(**base).fit(X_tr, y_tr)
+    acc = accuracy_score(y_val, m.predict(X_val))
+    print(f"{kw} -> {acc:.4f}")
+    return acc
+
+try_cfg()                                   # baseline
+try_cfg(alpha=1e-3)                         # more regularization
+try_cfg(learning_rate_init=5e-4)            # smaller steps
+try_cfg(batch_size=128)
+try_cfg(activation="tanh")
+try_cfg(hidden_layer_sizes=(256, 128))
+try_cfg(hidden_layer_sizes=(128, 64), early_stopping=True)   # stops when val stops improving
+</script>
+
+<script type="text/plain" id="l2e">
+ConfusionMatrixDisplay.from_predictions(y_val, model.predict(X_val), cmap="Blues")
+plt.show()                                   # which classes get confused with which?
+
+predictions = model.predict(X_test)
+submission = pd.DataFrame({ID_COL: test[ID_COL], TARGET: predictions})
+submission.to_csv("submission.csv", index=False)
+submission.head()
+</script>
+
+<script type="text/plain" id="l2f">
+# Same idea in PyTorch, useful when you need GPU, custom layers or more control
+import torch, torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
+dev = "cuda" if torch.cuda.is_available() else "cpu"
+
+Xt = torch.tensor(X_tr.values, dtype=torch.float32);  yt = torch.tensor(y_tr.values, dtype=torch.long)
+Xv = torch.tensor(X_val.values, dtype=torch.float32); yv = torch.tensor(y_val.values, dtype=torch.long)
+loader = DataLoader(TensorDataset(Xt, yt), batch_size=64, shuffle=True)
+
+n_in, n_out = Xt.shape[1], int(y.nunique())
+net = nn.Sequential(nn.Linear(n_in, 128), nn.ReLU(),
+                    nn.Linear(128, 64),   nn.ReLU(),
+                    nn.Linear(64, n_out)).to(dev)          # no softmax: the loss adds it
+opt, loss_fn = torch.optim.Adam(net.parameters(), 1e-3), nn.CrossEntropyLoss()
+
+for epoch in range(30):
+    net.train()
+    for xb, yb in loader:
+        xb, yb = xb.to(dev), yb.to(dev)
+        opt.zero_grad(); loss_fn(net(xb), yb).backward(); opt.step()
+    net.eval()
+    with torch.no_grad():
+        acc = (net(Xv.to(dev)).argmax(1).cpu() == yv).float().mean().item()
+    if epoch % 5 == 4: print(f"epoch {epoch+1}: val acc {acc:.4f}")
+</script>
+
+<!-- ========== LAB 3 ========== -->
+<script type="text/plain" id="l3a">
+import random, copy, numpy as np, pandas as pd
+import torch, torch.nn as nn, torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+def set_seed(s=42):
+    random.seed(s); np.random.seed(s); torch.manual_seed(s); torch.cuda.manual_seed_all(s)
+set_seed(42)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+DIR = "/kaggle/input/competitions/diabetes-prediction-with-ffnn-dl-fall-26-27/"
+TRAIN_CSV, TEST_CSV = DIR + "train.csv", DIR + "test.csv"     # two DIFFERENT files
+FEATURES = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness",
+            "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"]
+TARGET, ID_COL = "label", "id"
+ZERO_IS_MISSING = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]   # [] if not relevant
+# ====================================================
+
+train_df, test_df = pd.read_csv(TRAIN_CSV), pd.read_csv(TEST_CSV)
+
+# A glucose or BMI of 0 is impossible: replace with the train median
+for c in ZERO_IS_MISSING:
+    med = train_df.loc[train_df[c] != 0, c].median()
+    for d in (train_df, test_df):
+        d[c] = d[c].replace(0, med)
+
+X, y = train_df[FEATURES].values, train_df[TARGET].values
+X_te = test_df[FEATURES].values
+
+X_tr, X_val, y_tr, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+scaler = StandardScaler().fit(X_tr)                  # fit on TRAIN only
+X_tr, X_val, X_te = (scaler.transform(a) for a in (X_tr, X_val, X_te))
+
+T = lambda a, dt: torch.tensor(a, dtype=dt)
+X_tr, X_val, X_te = (T(a, torch.float32) for a in (X_tr, X_val, X_te))
+y_tr, y_val = T(y_tr, torch.long), T(y_val, torch.long)   # class ids must be long
+
+input_dim, num_classes = X_tr.shape[1], len(np.unique(y))
+print(input_dim, num_classes, X_tr.shape, X_val.shape)
+</script>
+
+<script type="text/plain" id="l3b">
+def build_model(h1, h2, p=0.3):
+    return nn.Sequential(
+        nn.Linear(input_dim, h1), nn.ReLU(), nn.Dropout(p),
+        nn.Linear(h1, h2),        nn.ReLU(), nn.Dropout(p),
+        nn.Linear(h2, num_classes))                  # raw logits, no softmax
+
+def accuracy(model, X, y):
+    model.eval()
+    with torch.no_grad():
+        return (model(X.to(device)).argmax(1).cpu() == y).float().mean().item()
+
+def fit(h1, h2, lr, epochs=300, batch=64, wd=1e-4, verbose=False):
+    model = build_model(h1, h2).to(device)
+    loss_fn = nn.CrossEntropyLoss()
+    opt = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
+    loader = DataLoader(TensorDataset(X_tr, y_tr), batch_size=batch, shuffle=True)
+    hist = {"loss": [], "val_loss": [], "acc": [], "val_acc": []}
+    for ep in range(epochs):
+        model.train()
+        for xb, yb in loader:
+            xb, yb = xb.to(device), yb.to(device)
+            opt.zero_grad()
+            loss = loss_fn(model(xb), yb)
+            loss.backward()
+            opt.step()
+        model.eval()
+        with torch.no_grad():
+            tr_loss = loss_fn(model(X_tr.to(device)), y_tr.to(device)).item()
+            va_loss = loss_fn(model(X_val.to(device)), y_val.to(device)).item()
+        hist["loss"].append(tr_loss); hist["val_loss"].append(va_loss)
+        hist["acc"].append(accuracy(model, X_tr, y_tr)); hist["val_acc"].append(accuracy(model, X_val, y_val))
+        if verbose and (ep + 1) % 20 == 0:
+            print(f"epoch {ep+1:3d} | loss {tr_loss:.4f} | val loss {va_loss:.4f} | val acc {hist['val_acc'][-1]:.3f}")
+    return model, hist
+</script>
+
+<script type="text/plain" id="l3c">
+# Sweep 1: how wide should the hidden layers be?
+sizes, res_h = [4, 8, 16, 32], {}
+for h in sizes:
+    set_seed(42)
+    _, hs = fit(h, max(h // 2, 2), lr=0.01, epochs=200)
+    res_h[h] = (hs["acc"][-1], hs["val_acc"][-1])
+    print(f"hidden {h:2d}: train {res_h[h][0]:.3f}  val {res_h[h][1]:.3f}")
+
+# Sweep 2: which learning rate?
+lrs, res_lr = [0.001, 0.005, 0.01, 0.05], {}
+for lr in lrs:
+    set_seed(42)
+    _, hs = fit(16, 8, lr=lr, epochs=200)
+    res_lr[lr] = (hs["acc"][-1], hs["val_acc"][-1])
+    print(f"lr {lr}: train {res_lr[lr][0]:.3f}  val {res_lr[lr][1]:.3f}")
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+ax[0].plot(sizes, [res_h[h][0] for h in sizes], "o-", label="train")
+ax[0].plot(sizes, [res_h[h][1] for h in sizes], "o-", label="val")
+ax[0].set(xlabel="hidden layer 1 size", ylabel="accuracy", title="Accuracy vs hidden size"); ax[0].legend()
+ax[1].plot(lrs, [res_lr[l][0] for l in lrs], "o-", label="train")
+ax[1].plot(lrs, [res_lr[l][1] for l in lrs], "o-", label="val")
+ax[1].set(xscale="log", xlabel="learning rate", title="Accuracy vs learning rate"); ax[1].legend()
+plt.tight_layout(); plt.show()
+</script>
+
+<script type="text/plain" id="l3d">
+set_seed(42)
+model, hist = fit(h1=8, h2=4, lr=0.001, epochs=300, verbose=True)   # settings chosen from the sweeps
+print("final val accuracy:", round(hist["val_acc"][-1], 4))
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+ax[0].plot(hist["loss"], label="train"); ax[0].plot(hist["val_loss"], label="val"); ax[0].set_title("Loss"); ax[0].legend()
+ax[1].plot(hist["acc"], label="train");  ax[1].plot(hist["val_acc"], label="val");  ax[1].set_title("Accuracy"); ax[1].legend()
+plt.show()
+
+model.eval()
+with torch.no_grad():
+    preds = model(X_te.to(device)).argmax(1).cpu().numpy()
+pd.DataFrame({ID_COL: test_df[ID_COL], TARGET: preds}).to_csv("submission.csv", index=False)
+</script>
+
+<!-- ========== LAB 4 ========== -->
+<script type="text/plain" id="l4a">
+import glob, random, time, numpy as np, pandas as pd
+import torch, torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
+
+SEED = 42
+def seed_everything(s=SEED):
+    random.seed(s); np.random.seed(s); torch.manual_seed(s); torch.cuda.manual_seed_all(s)
+seed_everything()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def find_file(name):          # searches Kaggle inputs, then the current folder
+    hits = glob.glob(f"/kaggle/input/**/{name}", recursive=True) + glob.glob(name)
+    if not hits: raise FileNotFoundError(f"{name} not found: add the data to the notebook")
+    return hits[0]
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+TARGET, ID_COL = "Age", "id"
+train      = pd.read_csv(find_file("train.csv"))
+test       = pd.read_csv(find_file("test.csv"))
+sample_sub = pd.read_csv(find_file("sample_submission.csv"))
+# ====================================================
+print(train.shape, test.shape)
+train.head()
+</script>
+
+<script type="text/plain" id="l4b">
+def build_features(df):
+    """Add ratios and products that the raw columns hide. Edit for your data."""
+    df = df.copy(); eps = 1e-6; cols = set(df.columns)
+    if {"Length", "Diameter", "Height"} <= cols:
+        df["Volume"] = df["Length"] * df["Diameter"] * df["Height"]
+    if {"Shell Weight", "Weight"} <= cols:
+        df["Shell_ratio"] = df["Shell Weight"] / (df["Weight"] + eps)
+    if {"Shucked Weight", "Weight"} <= cols:
+        df["Shucked_ratio"] = df["Shucked Weight"] / (df["Weight"] + eps)
+    return df
+
+y = train[TARGET].values.astype(np.float32)
+test_ids = test[ID_COL].values
+
+# Encode train + test together so one-hot columns match
+all_df = pd.concat([train.drop(columns=[TARGET, ID_COL]), test.drop(columns=[ID_COL])],
+                   axis=0, ignore_index=True)
+all_df = build_features(all_df)
+all_df = pd.get_dummies(all_df, dtype=np.float32)     # text columns such as Sex
+
+n_train = len(train)
+X_all = all_df.values.astype(np.float32)
+X_train_raw, X_test_raw = X_all[:n_train], X_all[n_train:]
+print("features:", all_df.shape[1], list(all_df.columns))
+</script>
+
+<script type="text/plain" id="l4c">
+class FFNN(nn.Module):
+    def __init__(self, in_dim, hidden=(256, 128, 64), dropout=0.15, y_mean=0.0):
+        super().__init__()
+        self.linears, self.norms = nn.ModuleList(), nn.ModuleList()
+        prev = in_dim
+        for h in hidden:
+            self.linears.append(nn.Linear(prev, h))
+            self.norms.append(nn.BatchNorm1d(h))      # steadies each layer's inputs
+            prev = h
+        self.act  = nn.SiLU()
+        self.drop = nn.Dropout(dropout)               # randomly zeroes units while training
+        self.out  = nn.Linear(prev, 1)                # one number, no activation
+        nn.init.constant_(self.out.bias, float(y_mean))   # start by predicting the average
+
+    def forward(self, x):
+        for lin, bn in zip(self.linears, self.norms):
+            x = self.drop(self.act(bn(lin(x))))       # Linear -> BN -> activation -> Dropout
+        return self.out(x).squeeze(-1)                # (N,1) -> (N,)
+</script>
+
+<script type="text/plain" id="l4d">
+CFG = dict(epochs=80, batch_size=512, lr=2e-3, weight_decay=1e-4,
+           hidden=(256, 128, 64), dropout=0.15, patience=12, n_folds=5)
+
+@torch.no_grad()
+def predict(model, X, bs=4096):
+    model.eval()                                      # turns Dropout off, BatchNorm uses running stats
+    return torch.cat([model(X[i:i+bs].to(device)).cpu() for i in range(0, len(X), bs)]).numpy()
+
+def train_fold(X_tr, y_tr, X_va, y_va, in_dim):
+    model = FFNN(in_dim, CFG["hidden"], CFG["dropout"], y_mean=y_tr.mean().item()).to(device)
+    opt   = torch.optim.AdamW(model.parameters(), lr=CFG["lr"], weight_decay=CFG["weight_decay"])
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=CFG["epochs"], eta_min=1e-5)
+    loss_fn = nn.L1Loss()                             # L1 = MAE. Use nn.MSELoss() for RMSE metrics
+    loader = DataLoader(TensorDataset(X_tr, y_tr), batch_size=CFG["batch_size"],
+                        shuffle=True, drop_last=True) # drop_last avoids a 1-row batch breaking BatchNorm
+    best, best_state, bad = float("inf"), None, 0
+    for epoch in range(CFG["epochs"]):
+        model.train()
+        for xb, yb in loader:
+            xb, yb = xb.to(device), yb.to(device)
+            opt.zero_grad(); loss_fn(model(xb), yb).backward(); opt.step()
+        sched.step()
+        mae = np.abs(predict(model, X_va) - y_va.numpy()).mean()
+        if mae < best - 1e-5:
+            best, bad = mae, 0
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        else:
+            bad += 1
+            if bad >= CFG["patience"]: break          # early stopping
+    model.load_state_dict(best_state)
+    return model, best
+</script>
+
+<script type="text/plain" id="l4e">
+kf = KFold(n_splits=CFG["n_folds"], shuffle=True, random_state=SEED)
+oof = np.zeros(n_train, dtype=np.float32)             # out-of-fold predictions
+test_preds = np.zeros(len(X_test_raw), dtype=np.float32)
+
+for fold, (tr_idx, va_idx) in enumerate(kf.split(X_train_raw), 1):
+    t0 = time.time()
+    scaler = StandardScaler().fit(X_train_raw[tr_idx])          # fit on this fold's train rows only
+    X_tr = torch.tensor(scaler.transform(X_train_raw[tr_idx]), dtype=torch.float32)
+    X_va = torch.tensor(scaler.transform(X_train_raw[va_idx]), dtype=torch.float32)
+    X_te = torch.tensor(scaler.transform(X_test_raw),          dtype=torch.float32)
+    y_tr, y_va = torch.tensor(y[tr_idx]), torch.tensor(y[va_idx])
+
+    model, mae = train_fold(X_tr, y_tr, X_va, y_va, X_tr.shape[1])
+    oof[va_idx] = predict(model, X_va)
+    test_preds += predict(model, X_te) / CFG["n_folds"]        # average the 5 models
+    print(f"fold {fold}: MAE {mae:.4f} ({time.time()-t0:.0f}s)")
+
+print("OOF MAE:", np.abs(oof - y).mean().round(4))
+
+test_preds = np.clip(test_preds, y.min(), y.max())            # keep predictions in the known range
+sub = sample_sub.copy()
+sub.iloc[:, 0] = test_ids
+sub.iloc[:, 1] = test_preds
+sub.to_csv("submission.csv", index=False)
+sub.head()
+</script>
+
+<!-- ===== code sources, labs 5-8 ===== -->
+<script type="text/plain" id="l5a">
+import os, numpy as np, pandas as pd, matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split
+
+keras.utils.set_random_seed(42)
+print("TF", tf.__version__, "| GPUs:", tf.config.list_physical_devices("GPU"))
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+BASE_DIR   = "/kaggle/input/competitions/dog-breed-identification/"
+LABELS_CSV = BASE_DIR + "labels.csv"      # columns: id, breed
+ID_COL, CLASS_COL = "id", "breed"
+IMG_DIR    = BASE_DIR + "train/"          # files are <id>.jpg
+IMG_SIZE, BATCH_SIZE = 160, 32
+# ====================================================
+
+df = pd.read_csv(LABELS_CSV)
+df["filepath"] = IMG_DIR + df[ID_COL] + ".jpg"
+df = df[df["filepath"].map(os.path.exists)].reset_index(drop=True)      # drop missing files
+
+class_names = sorted(df[CLASS_COL].unique())
+class_to_idx = {c: i for i, c in enumerate(class_names)}
+idx_to_class = {i: c for c, i in class_to_idx.items()}
+df["label"] = df[CLASS_COL].map(class_to_idx)
+NUM_CLASSES = len(class_names)
+print("images:", len(df), "| classes:", NUM_CLASSES)
+
+# Stratified 60 / 20 / 20: every class appears in every split
+train_df, temp_df = train_test_split(df, test_size=0.4, stratify=df["label"], random_state=42)
+val_df, test_df   = train_test_split(temp_df, test_size=0.5, stratify=temp_df["label"], random_state=42)
+train_df, val_df, test_df = (d.reset_index(drop=True) for d in (train_df, val_df, test_df))
+print(len(train_df), len(val_df), len(test_df), "| classes in val:", val_df["label"].nunique())
+</script>
+
+<script type="text/plain" id="l5b">
+AUTOTUNE = tf.data.AUTOTUNE
+
+def load_image(path, label):
+    img = tf.io.read_file(path)
+    img = tf.image.decode_jpeg(img, channels=3)      # always 3 channels
+    img = tf.image.resize(img, [IMG_SIZE, IMG_SIZE])
+    img = tf.cast(img, tf.float32) / 255.0           # scale to 0..1
+    return img, label
+
+def make_ds(frame, shuffle=False):
+    ds = tf.data.Dataset.from_tensor_slices(
+        (frame["filepath"].values, frame["label"].values.astype(np.int32)))
+    ds = ds.map(load_image, num_parallel_calls=AUTOTUNE)
+    if shuffle:
+        ds = ds.shuffle(2000, seed=42, reshuffle_each_iteration=True)
+    return ds.batch(BATCH_SIZE).prefetch(AUTOTUNE)
+
+train_ds, val_ds, test_ds = make_ds(train_df, True), make_ds(val_df), make_ds(test_df)
+
+# If your images are already in folders (root/class/img.jpg), this does all of the above:
+# train_ds = keras.utils.image_dataset_from_directory("root", validation_split=0.2, subset="training",
+#             seed=42, image_size=(IMG_SIZE, IMG_SIZE), batch_size=BATCH_SIZE)
+</script>
+
+<script type="text/plain" id="l5c">
+augment = keras.Sequential([                 # only active during training
+    layers.RandomFlip("horizontal"),
+    layers.RandomRotation(0.05),
+    layers.RandomZoom(0.10),
+    layers.RandomTranslation(0.05, 0.05),
+], name="augment")
+
+def conv_block(x, filters, drop):
+    for _ in range(2):                                          # two convs per block
+        x = layers.Conv2D(filters, 3, padding="same", use_bias=False)(x)
+        x = layers.BatchNormalization()(x)                      # steadies learning
+        x = layers.Activation("relu")(x)
+    x = layers.MaxPooling2D(2)(x)                               # halve height and width
+    return layers.Dropout(drop)(x)
+
+inputs = keras.Input((IMG_SIZE, IMG_SIZE, 3))
+x = augment(inputs)
+for filters, drop in [(32, 0.10), (64, 0.15), (128, 0.20), (256, 0.25)]:
+    x = conv_block(x, filters, drop)
+x = layers.GlobalAveragePooling2D()(x)           # 1 number per channel instead of Flatten
+x = layers.Dropout(0.4)(x)
+x = layers.Dense(256, activation="relu")(x)
+outputs = layers.Dense(NUM_CLASSES, activation="softmax")(x)
+model = keras.Model(inputs, outputs, name="cnn_from_scratch")
+
+model.compile(optimizer=keras.optimizers.Adam(1e-3),
+              loss="sparse_categorical_crossentropy",   # labels are integers, not one-hot
+              metrics=["accuracy"])
+model.summary()
+</script>
+
+<script type="text/plain" id="l5d">
+callbacks = [
+    keras.callbacks.EarlyStopping(monitor="val_loss", patience=6, restore_best_weights=True, verbose=1),
+    keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, min_lr=1e-6, verbose=1),
+    keras.callbacks.ModelCheckpoint("best.keras", monitor="val_loss", save_best_only=True),
+]
+history = model.fit(train_ds, validation_data=val_ds, epochs=40, callbacks=callbacks)
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+for a, (k, t) in zip(ax, [("loss", "Loss"), ("accuracy", "Accuracy")]):
+    a.plot(history.history[k], label="train"); a.plot(history.history["val_" + k], label="val")
+    a.set_title(t); a.set_xlabel("epoch"); a.legend(); a.grid(alpha=.3)
+plt.show()
+
+test_loss, test_acc = model.evaluate(test_ds)         # touch the test set once
+print(f"Test accuracy: {test_acc*100:.2f}%  (random guess = {100/NUM_CLASSES:.2f}%)")
+model.save("cnn_model.keras")
+</script>
+
+<script type="text/plain" id="l5e">
+# Look at predictions from one test batch
+imgs, labels = next(iter(test_ds))
+pred = np.argmax(model.predict(imgs, verbose=0), axis=1)
+plt.figure(figsize=(14, 9))
+for i in range(min(12, len(imgs))):
+    plt.subplot(3, 4, i + 1); plt.imshow(imgs[i].numpy()); plt.axis("off")
+    ok = pred[i] == labels[i].numpy()
+    plt.title(f"pred: {idx_to_class[pred[i]]}\ntrue: {idx_to_class[int(labels[i])]}",
+              fontsize=9, color="green" if ok else "red")
+plt.tight_layout(); plt.show()
+
+# Kaggle dog-breed format: one probability column per breed
+test_files = sorted(os.listdir(BASE_DIR + "test"))
+test_paths = [BASE_DIR + "test/" + f for f in test_files]
+ds = tf.data.Dataset.from_tensor_slices((test_paths, np.zeros(len(test_paths), np.int32)))
+ds = ds.map(load_image, num_parallel_calls=AUTOTUNE).batch(BATCH_SIZE).prefetch(AUTOTUNE)
+probs = model.predict(ds)
+
+sub = pd.DataFrame(probs, columns=class_names)
+sub.insert(0, "id", [f.replace(".jpg", "") for f in test_files])
+sub.to_csv("submission.csv", index=False)
+print(sub.shape)
+</script>
+
+<!-- ========== LAB 6 ========== -->
+<script type="text/plain" id="l6a">
+import os, copy, numpy as np, matplotlib.pyplot as plt
+import torch, torch.nn as nn, torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from torchvision import datasets, models, transforms
+from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Device:", device)
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+# The folder whose DIRECT children are the class folders (paper/, rock/, scissors/)
+DATA_DIR = "/kaggle/input/datasets/drgfreeman/rockpaperscissors/rps-cv-images"
+BATCH_SIZE, IMG_SIZE = 32, 224
+# ====================================================
+
+full = datasets.ImageFolder(DATA_DIR)              # no transform yet: returns PIL images
+class_names, NUM_CLASSES = full.classes, len(full.classes)
+print(full.class_to_idx, "| images:", len(full))   # CHECK: only your real classes, right count
+
+MEAN, STD = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]   # ImageNet statistics
+train_tf = transforms.Compose([
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.RandomRotation(20),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomAffine(0, translate=(0.1, 0.1)),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
+val_tf = transforms.Compose([                      # no random augmentation for validation
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
+
+class TransformSubset(Dataset):
+    """A subset of `base` that applies its own transform."""
+    def __init__(self, base, indices, tf): self.base, self.idx, self.tf = base, indices, tf
+    def __len__(self): return len(self.idx)
+    def __getitem__(self, i):
+        img, label = self.base[self.idx[i]]
+        return self.tf(img), label
+
+idx = np.arange(len(full))
+tr_idx, va_idx = train_test_split(idx, test_size=0.2, stratify=full.targets, random_state=42)
+train_loader = DataLoader(TransformSubset(full, tr_idx, train_tf), BATCH_SIZE, shuffle=True,  num_workers=2)
+val_loader   = DataLoader(TransformSubset(full, va_idx, val_tf),   BATCH_SIZE, shuffle=False, num_workers=2)
+print("train batches:", len(train_loader), "| val batches:", len(val_loader))
+</script>
+
+<script type="text/plain" id="l6b">
+from torchvision.models import ResNet18_Weights
+
+model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)   # pretrained on ImageNet
+for p in model.parameters():
+    p.requires_grad = False                                       # freeze the backbone
+
+model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)           # new head, trainable by default
+model = model.to(device)
+
+assert model.fc.out_features == NUM_CLASSES
+trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+total = sum(p.numel() for p in model.parameters())
+print(f"trainable {trainable:,} of {total:,} parameters")
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)            # only the new layer
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+</script>
+
+<script type="text/plain" id="l6c">
+def run_epoch(loader, train):
+    model.train(train)
+    loss_sum, correct, n = 0.0, 0, 0
+    with torch.set_grad_enabled(train):
+        for xb, yb in tqdm(loader, leave=False):
+            xb, yb = xb.to(device), yb.to(device)
+            out = model(xb)
+            loss = criterion(out, yb)
+            if train:
+                optimizer.zero_grad(); loss.backward(); optimizer.step()
+            loss_sum += loss.item() * xb.size(0)
+            correct  += (out.argmax(1) == yb).sum().item()
+            n += xb.size(0)
+    return loss_sum / n, correct / n
+
+EPOCHS = 10
+best_acc, best_state = 0.0, None
+hist = {"tr_loss": [], "tr_acc": [], "va_loss": [], "va_acc": []}
+for ep in range(1, EPOCHS + 1):
+    tl, ta = run_epoch(train_loader, True)
+    vl, va = run_epoch(val_loader, False)
+    scheduler.step()
+    for k, v in zip(hist, (tl, ta, vl, va)): hist[k].append(v)
+    print(f"epoch {ep:2d} | train {tl:.4f} / {ta:.4f} | val {vl:.4f} / {va:.4f}")
+    if va > best_acc:
+        best_acc = va
+        best_state = copy.deepcopy(model.state_dict())     # deepcopy: .copy() would keep changing
+
+model.load_state_dict(best_state)
+print("best val accuracy:", round(best_acc, 4))
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+ax[0].plot(hist["tr_loss"], label="train"); ax[0].plot(hist["va_loss"], label="val"); ax[0].set_title("Loss"); ax[0].legend()
+ax[1].plot(hist["tr_acc"], label="train");  ax[1].plot(hist["va_acc"], label="val");  ax[1].set_title("Accuracy"); ax[1].legend()
+plt.show()
+</script>
+
+<script type="text/plain" id="l6d">
+# --- Optional: fine-tune the last residual block with a much smaller learning rate ---
+for p in model.layer4.parameters():
+    p.requires_grad = True
+optimizer = optim.Adam([
+    {"params": model.layer4.parameters(), "lr": 1e-4},
+    {"params": model.fc.parameters(),     "lr": 1e-4}])
+for ep in range(5):
+    tl, ta = run_epoch(train_loader, True); vl, va = run_epoch(val_loader, False)
+    print(f"fine-tune {ep+1} | val acc {va:.4f}")
+
+# --- Predict one image from a file ---
+from PIL import Image
+def predict_image(path, topk=3):
+    model.eval()
+    x = val_tf(Image.open(path).convert("RGB")).unsqueeze(0).to(device)
+    with torch.no_grad():
+        p = torch.softmax(model(x), dim=1)[0]
+    conf, ix = p.topk(topk)
+    return [(class_names[i], round(c.item(), 3)) for c, i in zip(conf, ix)]
+# print(predict_image("my_photo.jpg"))
+
+torch.save({"state": model.state_dict(), "classes": class_names}, "resnet18_classifier.pth")
+</script>
+
+<!-- ========== LAB 7 ========== -->
+<script type="text/plain" id="l7a">
+!pip install -q ultralytics
+
+import os, shutil, yaml, random
+from pathlib import Path
+from collections import Counter
+import cv2, numpy as np, matplotlib.pyplot as plt, torch
+from ultralytics import YOLO, settings
+
+settings.update({"wandb": False}); os.environ["WANDB_DISABLED"] = "true"   # no login prompt
+SEED = 42; random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED)
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# /kaggle/input is READ-ONLY, so copy the dataset to /kaggle/working first
+SRC_YAML = next(Path("/kaggle/input").rglob("data.yaml"))     # Colab: Path("/content/dataset/data.yaml")
+DATA = Path("/kaggle/working/dataset")
+if DATA.exists(): shutil.rmtree(DATA)
+shutil.copytree(SRC_YAML.parent, DATA)
+
+cfg = yaml.safe_load(open(SRC_YAML))
+class_names = cfg["names"] if isinstance(cfg["names"], list) else list(cfg["names"].values())
+print("classes:", class_names)
+
+def find_split(*names):                       # handles train/images and images/train layouts
+    for n in names:
+        for cand in (DATA / n / "images", DATA / "images" / n):
+            if cand.exists(): return cand
+    return None
+
+train_dir, val_dir, test_dir = find_split("train"), find_split("valid", "val"), find_split("test")
+
+new_cfg = {"path": str(DATA), "train": str(train_dir), "val": str(val_dir),
+           "nc": len(class_names), "names": class_names}      # absolute paths, no surprises
+if test_dir: new_cfg["test"] = str(test_dir)
+DATA_YAML = Path("/kaggle/working/data_fixed.yaml")
+yaml.safe_dump(new_cfg, open(DATA_YAML, "w"))
+print(open(DATA_YAML).read())
+</script>
+
+<script type="text/plain" id="l7b">
+def label_dir_of(img_dir):                    # .../images -> .../labels
+    return Path(str(img_dir).replace(os.sep + "images", os.sep + "labels"))
+
+def split_stats(name, img_dir):
+    if img_dir is None: return
+    imgs = [p for p in Path(img_dir).iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+    counts = Counter()
+    for lf in label_dir_of(img_dir).glob("*.txt"):
+        for line in open(lf):
+            if line.strip(): counts[int(line.split()[0])] += 1
+    print(f"{name:5s}: {len(imgs)} images | boxes per class:", {class_names[k]: v for k, v in sorted(counts.items())})
+
+for n, d in [("train", train_dir), ("val", val_dir), ("test", test_dir)]:
+    split_stats(n, d)                         # a class with few boxes will be detected poorly
+
+def draw_yolo_boxes(img_path):
+    img = cv2.cvtColor(cv2.imread(str(img_path)), cv2.COLOR_BGR2RGB)
+    h, w = img.shape[:2]
+    lbl = label_dir_of(img_path.parent) / (img_path.stem + ".txt")
+    if lbl.exists():
+        for line in open(lbl):
+            parts = line.split()
+            if len(parts) < 5: continue
+            c, (xc, yc, bw, bh) = int(parts[0]), map(float, parts[1:5])    # normalized 0..1
+            x1, y1 = int((xc - bw/2) * w), int((yc - bh/2) * h)
+            x2, y2 = int((xc + bw/2) * w), int((yc + bh/2) * h)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+            cv2.putText(img, class_names[c], (x1, max(y1 - 8, 15)), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 0), 2)
+    return img
+
+sample = random.sample(sorted(Path(train_dir).glob("*.*")), 6)
+fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+for ax, p in zip(axes.ravel(), sample):
+    ax.imshow(draw_yolo_boxes(p)); ax.axis("off")
+plt.suptitle("Ground-truth boxes"); plt.tight_layout(); plt.show()
+</script>
+
+<script type="text/plain" id="l7c">
+# Baseline: the COCO-pretrained model before fine-tuning (knows 80 everyday classes, not yours)
+base_model = YOLO("yolo11n.pt")
+eval_dir = Path(test_dir or val_dir)
+samples = sorted(eval_dir.glob("*.*"))[:6]
+base_preds = base_model.predict([str(p) for p in samples], conf=0.25, verbose=False)
+fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+for ax, r in zip(axes.ravel(), base_preds):
+    ax.imshow(r.plot()[..., ::-1]); ax.axis("off")      # r.plot() is BGR, [..., ::-1] makes it RGB
+plt.suptitle("Before fine-tuning"); plt.show()
+
+# Fine-tune
+model = YOLO("yolo11n.pt")
+results = model.train(
+    data=str(DATA_YAML),
+    epochs=30,
+    imgsz=640,
+    batch=16,
+    freeze=10,            # keep the first 10 layers fixed: faster, safer on small data
+    patience=10,          # stop if no improvement for 10 epochs
+    device=DEVICE,
+    workers=2,
+    seed=SEED,
+    project="/kaggle/working/runs", name="exp", exist_ok=True,
+    plots=True)
+
+save_dir = Path(model.trainer.save_dir)
+from IPython.display import Image, display
+display(Image(filename=str(save_dir / "results.png")))                    # loss and mAP curves
+cm = save_dir / "confusion_matrix_normalized.png"
+if cm.exists(): display(Image(filename=str(cm)))
+</script>
+
+<script type="text/plain" id="l7d">
+best = YOLO(str(save_dir / "weights" / "best.pt"))
+split = "test" if test_dir else "val"
+m = best.val(data=str(DATA_YAML), split=split, imgsz=640, device=DEVICE, plots=True)
+
+print(f"Precision   : {m.box.mp:.3f}")       # of boxes drawn, how many correct
+print(f"Recall      : {m.box.mr:.3f}")       # of real objects, how many found
+print(f"mAP@0.5     : {m.box.map50:.3f}")
+print(f"mAP@0.5:.95 : {m.box.map:.3f}")
+for i, c in enumerate(m.box.ap_class_index):
+    p, r, ap50, ap = m.box.class_result(i)
+    print(f"{class_names[c]:10s} P={p:.3f} R={r:.3f} AP50={ap50:.3f} AP50-95={ap:.3f}")
+
+# Predict on new images
+imgs = random.sample(sorted(eval_dir.glob("*.*")), 6)
+preds = best.predict([str(p) for p in imgs], conf=0.25, verbose=False)   # lower conf = more boxes
+fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+for ax, r in zip(axes.ravel(), preds):
+    ax.imshow(r.plot()[..., ::-1]); ax.axis("off")
+plt.suptitle("After fine-tuning"); plt.show()
+
+# Read boxes as numbers
+r = preds[0]
+for box, cls, conf in zip(r.boxes.xyxy.tolist(), r.boxes.cls.tolist(), r.boxes.conf.tolist()):
+    print(class_names[int(cls)], round(conf, 2), [round(v) for v in box])
+
+# best.export(format="onnx")     # optional: deploy elsewhere
+print("weights:", save_dir / "weights" / "best.pt")
+</script>
+
+<!-- ========== LAB 8 ========== -->
+<script type="text/plain" id="l8a">
+import os, glob, math, random, time, urllib.request
+import numpy as np, torch, torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+import matplotlib.pyplot as plt
+
+SEED = 42
+random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED); torch.cuda.manual_seed_all(SEED)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# ========== CHANGE THESE FOR YOUR DATASET ==========
+CORPUS_URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+LOCAL_PATH = "corpus.txt"
+# ====================================================
+
+def load_corpus(path=LOCAL_PATH):
+    try:
+        urllib.request.urlretrieve(CORPUS_URL, path)          # needs Internet ON in Kaggle
+    except Exception as e:
+        print("Download failed:", type(e).__name__)
+    if not os.path.exists(path):                              # fall back to an attached .txt dataset
+        cands = glob.glob("/kaggle/input/**/*.txt", recursive=True) + glob.glob("*.txt")
+        if not cands: raise FileNotFoundError("Turn Internet on or add a .txt dataset")
+        path = cands[0]; print("Using", path)
+    return open(path, encoding="utf-8").read()
+
+text = load_corpus()
+print(len(text), "characters")
+
+chars = sorted(set(text))                                     # the vocabulary
+vocab_size = len(chars)
+char2idx = {c: i for i, c in enumerate(chars)}
+idx2char = {i: c for c, i in char2idx.items()}
+encoded = np.array([char2idx[c] for c in text], dtype=np.int64)
+print("vocab:", vocab_size, "| sample:", encoded[:15], repr("".join(idx2char[i] for i in encoded[:15])))
+</script>
+
+<script type="text/plain" id="l8b">
+SEQ_LEN, STRIDE, BATCH_SIZE = 100, 5, 128    # window length, step between windows
+
+class CharDataset(Dataset):
+    def __init__(self, data, seq_len, stride):
+        self.data, self.seq_len = data, seq_len
+        self.starts = np.arange(0, len(data) - seq_len - 1, stride)
+    def __len__(self): return len(self.starts)
+    def __getitem__(self, i):
+        s = self.starts[i]
+        chunk = self.data[s : s + self.seq_len + 1]
+        return torch.from_numpy(chunk[:-1]), torch.from_numpy(chunk[1:])   # target = input shifted by 1
+
+split = int(0.9 * len(encoded))              # 90 / 10 split in order, not shuffled
+train_ds = CharDataset(encoded[:split], SEQ_LEN, STRIDE)
+val_ds   = CharDataset(encoded[split:], SEQ_LEN, STRIDE)
+train_loader = DataLoader(train_ds, BATCH_SIZE, shuffle=True, drop_last=True)
+val_loader   = DataLoader(val_ds,   BATCH_SIZE, shuffle=False)
+
+x, y = train_ds[0]
+print("X:", repr("".join(idx2char[int(i)] for i in x[:30])))
+print("Y:", repr("".join(idx2char[int(i)] for i in y[:30])))
+</script>
+
+<script type="text/plain" id="l8c">
+class CharLSTM(nn.Module):
+    def __init__(self, vocab_size, embedding_dim=128, hidden_dim=256, num_layers=1):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)   # id -> vector
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, vocab_size)                # vector -> score per character
+
+    def forward(self, x, hidden=None):
+        out = self.embedding(x)               # [B, T, E]
+        out, hidden = self.lstm(out, hidden)  # [B, T, H], memory carried in `hidden`
+        return self.fc(out), hidden           # [B, T, V]
+
+model = CharLSTM(vocab_size, 128, 256).to(device)
+print(model)
+print("parameters:", sum(p.numel() for p in model.parameters()))
+</script>
+
+<script type="text/plain" id="l8d">
+EPOCHS, LR, CLIP = 10, 2e-3, 1.0
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS, eta_min=1e-4)
+
+def run_epoch(loader, train):
+    model.train(train)
+    total, n = 0.0, 0
+    with torch.set_grad_enabled(train):
+        for xb, yb in loader:
+            xb, yb = xb.to(device), yb.to(device)
+            logits, _ = model(xb)                                          # [B, T, V]
+            loss = criterion(logits.reshape(-1, vocab_size), yb.reshape(-1))   # score every position
+            if train:
+                optimizer.zero_grad()
+                loss.backward()                                            # backprop through time
+                nn.utils.clip_grad_norm_(model.parameters(), CLIP)         # stop exploding gradients
+                optimizer.step()
+            total += loss.item() * xb.size(0); n += xb.size(0)
+    return total / n
+
+hist, best_val, best_state = {"train": [], "val": []}, float("inf"), None
+for ep in range(1, EPOCHS + 1):
+    t0 = time.time()
+    tr, va = run_epoch(train_loader, True), run_epoch(val_loader, False)
+    scheduler.step()
+    hist["train"].append(tr); hist["val"].append(va)
+    if va < best_val:
+        best_val = va
+        best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+    print(f"epoch {ep:2d}/{EPOCHS} | train {tr:.4f} | val {va:.4f} | perplexity {math.exp(va):.2f} | {time.time()-t0:.0f}s")
+
+model.load_state_dict(best_state)
+torch.save(model.state_dict(), "char_lstm.pt")
+plt.plot(hist["train"], marker="o", label="train"); plt.plot(hist["val"], marker="o", label="val")
+plt.xlabel("epoch"); plt.ylabel("cross-entropy"); plt.legend(); plt.grid(alpha=.3); plt.show()
+</script>
+
+<script type="text/plain" id="l8e">
+@torch.no_grad()
+def generate(model, seed, n_chars=200, temperature=0.8):
+    model.eval()
+    seed = "".join(c for c in seed if c in char2idx)       # ignore characters not in the vocabulary
+    if not seed: raise ValueError("Seed has no characters from the training vocabulary")
+    x = torch.tensor([[char2idx[c] for c in seed]], device=device)
+    logits, hidden = model(x)                              # feed the seed to build up memory
+    last = logits[:, -1, :]
+    out = list(seed)
+    for _ in range(n_chars):
+        probs = torch.softmax(last / temperature, dim=-1)  # low T = safe, high T = adventurous
+        nxt = torch.multinomial(probs, 1)                  # sample, do not always take the max
+        out.append(idx2char[nxt.item()])
+        logits, hidden = model(nxt, hidden)                # feed the sampled char back in
+        last = logits[:, -1, :]
+    return "".join(out)
+
+for T in (0.4, 0.8, 1.2):
+    print(f"=== temperature {T} ===")
+    print(generate(model, "KING", 200, T), "\n")
+</script>
+<!-- ===== run-section code ===== -->
+<script type="text/plain" id="r1">
+import sys, torch
+ON_COLAB  = "google.colab" in sys.modules
+ON_KAGGLE = __import__("os").path.exists("/kaggle/input")
+print("Colab:", ON_COLAB, "| Kaggle:", ON_KAGGLE)
+print("PyTorch GPU available:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    print(torch.cuda.get_device_name(0))
+# Keras / TensorFlow users:
+# import tensorflow as tf; print(tf.config.list_physical_devices("GPU"))
+# !nvidia-smi        # shows the GPU, memory use and running processes
+</script>
+
+<script type="text/plain" id="r2">
+import os
+ROOT = "/kaggle/input"            # on Colab use "/content"
+for dirpath, dirnames, filenames in os.walk(ROOT):
+    depth = dirpath[len(ROOT):].count(os.sep)
+    if depth > 3:
+        dirnames[:] = []          # do not go deeper
+        continue
+    print(dirpath, "|", len(filenames), "files", filenames[:3])
+# Copy the printed folder path into TRAIN_CSV / DATA_DIR. Paths differ between
+# competitions (/kaggle/input/competitions/<name>/) and datasets (/kaggle/input/datasets/<owner>/<name>/).
+</script>
+
+<script type="text/plain" id="r6">
+import sys, os
+ON_COLAB  = "google.colab" in sys.modules
+DATA_ROOT = "/content/data" if ON_COLAB else "/kaggle/input"
+OUT_DIR   = "/content"      if ON_COLAB else "/kaggle/working"
+os.makedirs(OUT_DIR, exist_ok=True)
+
+# then, in any lab:
+# TRAIN_CSV = f"{DATA_ROOT}/titanic/train.csv"      # adjust to what the listing cell printed
+# submission.to_csv(f"{OUT_DIR}/submission.csv", index=False)
+</script>
+
+<script type="text/plain" id="r3">
+!pip install -q kaggle
+from google.colab import files
+files.upload()        # choose kaggle.json (kaggle.com > Settings > API > Create New Token)
+
+!mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/ && chmod 600 ~/.kaggle/kaggle.json
+
+# Competition data: accept the rules on the competition page first, or you get 403
+!kaggle competitions download -c titanic -p data
+!unzip -q -o data/titanic.zip -d data/titanic
+
+# Dataset data
+!kaggle datasets download -d drgfreeman/rockpaperscissors -p data --unzip
+</script>
+
+<script type="text/plain" id="r4">
+from google.colab import drive
+drive.mount("/content/drive")                       # approve the pop-up
+
+import os, torch
+CKPT = "/content/drive/MyDrive/dl_labs/checkpoints"
+os.makedirs(CKPT, exist_ok=True)
+
+# inside your training loop, after each good epoch:
+# torch.save(model.state_dict(), f"{CKPT}/best.pt")
+
+# to resume after a disconnect:
+# model.load_state_dict(torch.load(f"{CKPT}/best.pt", map_location="cpu"))
+</script>
+
+<script type="text/plain" id="r5">
+!kaggle competitions submit -c titanic -f submission.csv -m "random forest baseline"
+!kaggle competitions submissions -c titanic         # shows your score
+
+# or download the file and upload it by hand
+from google.colab import files
+files.download("submission.csv")
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- reference links ---------- */
+var REFS=[
+ {g:"Start here",items:[
+  ["Kaggle Learn","https://www.kaggle.com/learn","Short free courses: Python, pandas, Intro and Intermediate ML, Intro to Deep Learning, Computer Vision."],
+  ["Dive into Deep Learning","https://d2l.ai/","Free interactive book with code in PyTorch and TensorFlow."],
+  ["Practical Deep Learning (fast.ai)","https://course.fast.ai/","Top-down course that starts with working models."],
+  ["Neural networks (3Blue1Brown)","https://www.3blue1brown.com/topics/neural-networks","Best visual explanation of gradient descent and backpropagation."],
+  ["Machine Learning Crash Course","https://developers.google.com/machine-learning/crash-course","Google's course on loss, overfitting, splits and metrics."],
+  ["CS231n notes","https://cs231n.github.io/","Stanford notes on CNNs, training and tuning."]]},
+ {g:"Lab 1 · Random Forest",items:[
+  ["Forests of randomized trees","https://scikit-learn.org/stable/modules/ensemble.html#random-forests","scikit-learn user guide."],
+  ["RandomForestClassifier API","https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html","Every parameter explained."],
+  ["Titanic competition","https://www.kaggle.com/c/titanic","Data, rules and public notebooks."],
+  ["Intermediate Machine Learning","https://www.kaggle.com/learn/intermediate-machine-learning","Missing values, categorical variables, pipelines, leakage."]]},
+ {g:"Lab 2 · MLP",items:[
+  ["Neural network models (supervised)","https://scikit-learn.org/stable/modules/neural_networks_supervised.html","scikit-learn guide to MLPClassifier."],
+  ["MLPClassifier API","https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html","Parameters such as alpha, batch_size, early_stopping."],
+  ["Fashion-MNIST","https://github.com/zalandoresearch/fashion-mnist","The dataset family behind the outfit task."]]},
+ {g:"Lab 3 · FFNN in PyTorch",items:[
+  ["PyTorch Quickstart","https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html","Data, model, train and test in one page."],
+  ["Build the neural network","https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html","nn.Module, Linear, ReLU, Sequential."],
+  ["Optimizing model parameters","https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html","The training loop step by step."],
+  ["CrossEntropyLoss","https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html","Why it takes logits and class indices."]]},
+ {g:"Lab 4 · Regression, BatchNorm, Dropout",items:[
+  ["Batch Normalization paper","https://arxiv.org/abs/1502.03167","Ioffe and Szegedy, 2015."],
+  ["Dropout paper","https://jmlr.org/papers/v15/srivastava14a.html","Srivastava et al., JMLR 2014."],
+  ["Cross-validation","https://scikit-learn.org/stable/modules/cross_validation.html","KFold, StratifiedKFold and why to use them."],
+  ["AdamW","https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html","Optimizer with decoupled weight decay."],
+  ["Crab Age playground competition","https://www.kaggle.com/competitions/playground-series-s3e16","Public notebooks show feature ideas."]]},
+ {g:"Lab 5 · CNN from scratch (Keras)",items:[
+  ["Image classification from scratch","https://keras.io/examples/vision/image_classification_from_scratch/","Keras example with augmentation."],
+  ["Data augmentation","https://www.tensorflow.org/tutorials/images/data_augmentation","Keras preprocessing layers."],
+  ["tf.data guide","https://www.tensorflow.org/guide/data","Fast input pipelines with map, batch, prefetch."],
+  ["Keras callbacks","https://keras.io/api/callbacks/","EarlyStopping, ReduceLROnPlateau, ModelCheckpoint."],
+  ["CS231n: Convolutional networks","https://cs231n.github.io/convolutional-networks/","How conv, pooling and shapes fit together."],
+  ["Dog Breed Identification","https://www.kaggle.com/c/dog-breed-identification","Competition page and submission format."]]},
+ {g:"Lab 6 · Transfer learning",items:[
+  ["Transfer learning tutorial","https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html","Fine-tuning vs fixed feature extractor."],
+  ["torchvision models","https://pytorch.org/vision/stable/models.html","List of pretrained weights and their transforms."],
+  ["ImageFolder","https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html","How folder names become labels."],
+  ["Deep Residual Learning (ResNet)","https://arxiv.org/abs/1512.03385","He et al., 2015."]]},
+ {g:"Lab 7 · YOLO11",items:[
+  ["Ultralytics docs","https://docs.ultralytics.com/","Everything about training, predicting, exporting."],
+  ["YOLO11 models","https://docs.ultralytics.com/models/yolo11/","Sizes n, s, m, l, x and their speed and accuracy."],
+  ["Train mode and arguments","https://docs.ultralytics.com/modes/train/","epochs, imgsz, batch, freeze, patience."],
+  ["Detection dataset format","https://docs.ultralytics.com/datasets/detect/","The labels .txt and data.yaml layout."],
+  ["Performance metrics guide","https://docs.ultralytics.com/guides/yolo-performance-metrics/","IoU, precision, recall, mAP explained."],
+  ["Roboflow Universe","https://universe.roboflow.com/","Public datasets, exportable in YOLO format."]]},
+ {g:"Lab 8 · LSTM",items:[
+  ["The Unreasonable Effectiveness of RNNs","https://karpathy.github.io/2015/05/21/rnn-effectiveness/","The classic post on character-level generation."],
+  ["Understanding LSTMs","https://colah.github.io/posts/2015-08-Understanding-LSTMs/","Clear diagrams of the gates and cell state."],
+  ["nn.LSTM","https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html","Shapes of inputs, outputs and hidden state."],
+  ["Char-RNN generation tutorial","https://pytorch.org/tutorials/intermediate/char_rnn_generation_tutorial.html","PyTorch's own example."],
+  ["char-rnn repository","https://github.com/karpathy/char-rnn","Source of the Tiny Shakespeare file."]]},
+ {g:"Kaggle and Colab",items:[
+  ["Kaggle Notebooks documentation","https://www.kaggle.com/docs/notebooks","Sessions, data, versions, sharing."],
+  ["Efficient GPU usage on Kaggle","https://www.kaggle.com/docs/efficient-gpu-usage","Quotas and tips."],
+  ["Kaggle API","https://github.com/Kaggle/kaggle-api","Command-line download and submit."],
+  ["kagglehub","https://github.com/Kaggle/kagglehub","Download datasets and models from Python."],
+  ["Google Colab","https://colab.research.google.com/","Open or upload a notebook."],
+  ["Colab FAQ","https://research.google.com/colaboratory/faq.html","Limits, GPUs, disconnects."],
+  ["Loading data into Colab","https://colab.research.google.com/notebooks/io.ipynb","Drive, local files, Sheets, Cloud Storage."]]},
+ {g:"Debugging and tuning",items:[
+  ["A Recipe for Training Neural Networks","https://karpathy.github.io/2019/04/25/recipe/","Step-by-step method for finding bugs."],
+  ["Deep Learning Tuning Playbook","https://github.com/google-research/tuning_playbook","How to choose and tune hyperparameters."],
+  ["PyTorch forums","https://discuss.pytorch.org/","Search an exact error message here."],
+  ["PyTorch reproducibility notes","https://pytorch.org/docs/stable/notes/randomness.html","Seeds and deterministic runs."]]}
+];
+
+/* ---------- error catalogue ---------- */
+var ERR_CATS=["Data and paths","Preprocessing","Model and shapes","Training","Evaluation","Kaggle and Colab"];
+var ERRS=[
+ {c:0,lab:1,t:"FileNotFoundError or an empty input folder",
+  s:"FileNotFoundError: [Errno 2] No such file or directory: '/kaggle/input/...'",
+  w:"The path was typed from memory or copied from another notebook. Kaggle paths differ between competitions (<code>/kaggle/input/competitions/name/</code>) and datasets (<code>/kaggle/input/datasets/owner/name/</code>). The folder is also empty if the data was never added.",
+  f:"Run the folder-listing cell from the Kaggle &amp; Colab section and copy the printed path. Check that the competition is joined and the data is attached. In Colab the data is under <code>/content/</code>."},
+ {c:0,lab:1,fl:1,t:"ImageFolder shows an extra class",
+  s:"Classes: ['paper', 'rock', 'rps-cv-images', 'scissors'], 4 classes and double the images (4,376 instead of 2,188). Accuracy stuck near 50%.",
+  w:"<code>ImageFolder(root)</code> turns every direct sub-folder of <code>root</code> into a class. The path pointed one level too high, so the nested folder <code>rps-cv-images</code> became a class and its images were counted a second time.",
+  f:"Point <code>root</code> at the folder whose direct children are only the class folders. Always print <code>dataset.class_to_idx</code> and <code>len(dataset)</code> and compare with what you expect. Delete stray folders such as <code>.ipynb_checkpoints</code> if they appear."},
+ {c:0,lab:3,fl:1,t:"Test predictions come from the training file",
+  s:"No error. The submission scores far too well or does not match the test row count.",
+  w:"The notebook read <code>train.csv</code> into both <code>train_df</code> and <code>comp_test_df</code>. Nothing fails, the model just predicts rows it already saw.",
+  f:"Use two variables with two different paths, then check <code>len(test_df)</code> against <code>sample_submission.csv</code> before saving."},
+ {c:0,lab:7,fl:1,t:"OSError: read-only file system when writing next to the data",
+  s:"OSError: [Errno 30] Read-only file system: '/kaggle/input/...'",
+  w:"<code>/kaggle/input</code> is read-only. YOLO writes label caches next to the labels, and you may need to edit <code>data.yaml</code>.",
+  f:"Copy the dataset to <code>/kaggle/working</code> with <code>shutil.copytree</code> and write a new yaml with absolute paths (Lab 7, step 1)."},
+ {c:0,lab:7,t:"Ultralytics: images found but no labels",
+  s:"WARNING No labels found / dataset 'data.yaml' images not found",
+  w:"YOLO finds labels by replacing <code>/images/</code> with <code>/labels/</code> in each image path. A different folder layout or relative yaml paths break this.",
+  f:"Keep the pairs <code>.../images/x.jpg</code> and <code>.../labels/x.txt</code>. Use absolute <code>train</code> and <code>val</code> paths in the yaml. Check that each label line is <code>class xc yc w h</code> with values between 0 and 1."},
+ {c:0,lab:5,t:"Corrupt or missing images",
+  s:"UnidentifiedImageError, InvalidArgumentError: Unknown image file format, or Missing: id.jpg",
+  w:"A file is damaged, has the wrong extension, or the CSV lists an id with no file.",
+  f:"Filter the DataFrame with <code>os.path.exists</code> before building the dataset (Lab 5, step 1). Open a few images with PIL to find the bad ones. Convert with <code>.convert('RGB')</code>."},
+ {c:0,lab:0,t:"ModuleNotFoundError after pip install",
+  s:"ModuleNotFoundError: No module named 'ultralytics'",
+  w:"The install ran in another environment, failed silently with <code>-q</code>, or Kaggle Internet is off.",
+  f:"Use <code>!pip install -q package</code> in a cell above the imports. On Kaggle turn Internet on first. On Colab, if the message says restart, use <b>Runtime, Restart session</b> and run again."},
+
+ {c:1,lab:1,t:"Test set has different columns from the training set",
+  s:"ValueError: The feature names should match those that were passed during fit",
+  w:"<code>get_dummies</code> was run separately. A category that is missing from one file produces a different set of columns.",
+  f:"Concatenate train and test, encode once, then split again (Lab 1, step 2). Or use <code>X_test = X_test.reindex(columns=X.columns, fill_value=0)</code>."},
+ {c:1,lab:1,t:"NaN values",
+  s:"ValueError: Input X contains NaN, or loss: nan from the first epoch",
+  w:"Missing values reach the model. Neural networks cannot process NaN. A single NaN makes the whole loss NaN.",
+  f:"Count with <code>df.isna().sum()</code>. Fill numbers with the train median and text with the most frequent value. Check again after feature engineering, because ratios such as <code>a / b</code> can create <code>inf</code> and NaN."},
+ {c:1,lab:3,t:"Zeros that mean 'missing'",
+  s:"No error. Glucose, BloodPressure, BMI or Insulin contain 0.",
+  w:"A person cannot have a blood pressure of 0. The dataset stores a missing measurement as 0, which distorts scaling and the model.",
+  f:"Replace 0 with the train median in those columns (Lab 3, step 1), or add a column that flags missing values."},
+ {c:1,lab:0,fl:1,t:"Data leakage",
+  s:"Validation accuracy is excellent, test or leaderboard score is poor.",
+  w:"Information from validation or test data reached training: the scaler was fitted on all rows, the same images were in both sets, or duplicates exist across splits.",
+  f:"Split first. Fit scalers, imputers and encoders on the train part only. Use a separate split with a fixed seed. In Lab 6 the original code used the same folder for train and validation; the corrected code uses <code>train_test_split</code> on indices."},
+ {c:1,lab:0,t:"Images in the wrong format or range",
+  s:"RuntimeError: Given groups=1, weight of size [64, 3, 7, 7], expected input to have 3 channels, but got 1 channels",
+  w:"Grayscale or RGBA images were passed to a model that expects 3 channels. Or pixels are 0 to 255 when the model expects 0 to 1, or ImageNet-normalized values for a pretrained model.",
+  f:"Convert with <code>Image.open(p).convert('RGB')</code> or <code>decode_jpeg(channels=3)</code>. Scale with <code>/255</code>. For pretrained torchvision models also apply <code>Normalize(mean, std)</code>."},
+ {c:1,lab:0,t:"Labels have the wrong type or range",
+  s:"RuntimeError: expected scalar type Long but found Float, or IndexError: Target 3 is out of bounds",
+  w:"<code>CrossEntropyLoss</code> needs integer class ids from 0 to N-1 as <code>torch.long</code>. Labels such as 1 and 2 (no 0), or a float tensor, fail.",
+  f:"Map classes to 0..N-1 with a dictionary. Use <code>torch.tensor(y, dtype=torch.long)</code>. In Keras with <code>sparse_categorical_crossentropy</code> use integer labels, and with <code>categorical_crossentropy</code> use one-hot."},
+ {c:1,lab:0,fl:1,t:"Syntax error from a missing comma",
+  s:"SyntaxError: invalid syntax. Perhaps you forgot a comma?",
+  w:"In a long call such as <code>MLPClassifier(...)</code> one argument line lacks a trailing comma, for example <code>max_iter = 150</code> followed by <code>early_stopping = True</code>.",
+  f:"Put a comma after every argument. Write them one per line so a missing comma stands out. The error line number points to the line after the missing comma."},
+
+ {c:2,lab:0,t:"Shape mismatch in a Linear layer",
+  s:"RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x1024 and 512x10)",
+  w:"The layer's <code>in_features</code> does not equal the size of the tensor reaching it. This usually happens after changing the input size, adding a conv layer, or forgetting to flatten.",
+  f:"Print <code>x.shape</code> after each layer with a dummy batch: <code>model(torch.zeros(2, 3, 224, 224))</code>. Use <code>nn.LazyLinear</code> or <code>AdaptiveAvgPool2d(1)</code> so the size does not depend on the input."},
+ {c:2,lab:6,fl:1,t:"Number of outputs does not match number of classes",
+  s:"CUDA error: device-side assert triggered, or Assertion `t >= 0 &amp;&amp; t < n_classes` failed",
+  w:"A label is larger than the number of output units. In Lab 6 the model had 4 outputs because the folder listing showed a fake fourth class.",
+  f:"Set the output size from the data: <code>NUM_CLASSES = len(dataset.classes)</code>. Re-run on CPU to get a readable error message. Restart the session, because a CUDA assert leaves the GPU in a bad state."},
+ {c:2,lab:0,t:"Softmax before CrossEntropyLoss",
+  s:"No error, but loss decreases slowly and accuracy plateaus.",
+  w:"PyTorch's <code>CrossEntropyLoss</code> already applies log-softmax. Applying softmax in the model first squashes the signal twice.",
+  f:"End the PyTorch model with a plain <code>Linear</code>. Use <code>softmax</code> only at prediction time. In Keras you do put <code>softmax</code> in the last layer and use <code>from_logits=False</code>."},
+ {c:2,lab:4,t:"Regression output has shape (N, 1)",
+  s:"UserWarning: Using a target size (torch.Size([512])) that is different to the input size (torch.Size([512, 1]))",
+  w:"The model returns (N, 1) while targets are (N). The loss broadcasts to (N, N) and trains on the wrong thing.",
+  f:"Return <code>self.out(x).squeeze(-1)</code> (as in Lab 4) or reshape the targets with <code>y.view(-1, 1)</code>."},
+ {c:2,lab:4,t:"BatchNorm fails on a batch of one",
+  s:"ValueError: Expected more than 1 value per channel when training",
+  w:"The last batch of an epoch contains a single row, and BatchNorm cannot compute a variance from one sample.",
+  f:"Set <code>drop_last=True</code> in the training <code>DataLoader</code>, or choose a batch size that divides the data size."},
+ {c:2,lab:0,t:"Tensors on different devices",
+  s:"RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu",
+  w:"The model is on the GPU, the batch (or labels) is still on the CPU.",
+  f:"Move every batch: <code>xb, yb = xb.to(device), yb.to(device)</code>. When saving predictions, bring them back with <code>.cpu().numpy()</code>."},
+ {c:2,lab:0,t:"Float64 vs Float32",
+  s:"RuntimeError: mat1 and mat2 must have the same dtype, but got Double and Float",
+  w:"NumPy and pandas create float64 arrays. PyTorch layers use float32.",
+  f:"Create tensors with <code>torch.tensor(a, dtype=torch.float32)</code> or <code>X.astype('float32')</code>."},
+ {c:2,lab:5,t:"Keras loss and label format disagree",
+  s:"ValueError: Shapes (None, 1) and (None, 120) are incompatible",
+  w:"Integer labels were used with <code>categorical_crossentropy</code>, or one-hot labels with <code>sparse_categorical_crossentropy</code>.",
+  f:"Integer labels pair with <code>sparse_categorical_crossentropy</code> (Lab 5). One-hot labels pair with <code>categorical_crossentropy</code>."},
+
+ {c:3,lab:5,fl:1,t:"Loss stuck at ln(number of classes)",
+  s:"Dog breed: loss 4.79 and 1% accuracy from the first to the last epoch (ln 120 = 4.787).",
+  w:"The model outputs a uniform guess and never learns. Causes seen here: a Flatten into a 26-million-parameter dense layer, no normalization between layers, heavy augmentation with a small dataset, and 120 classes with about 50 images each.",
+  f:"Add <code>BatchNormalization</code> after each convolution. Replace <code>Flatten + Dense</code> with <code>GlobalAveragePooling2D</code>. Try the overfit test: train on 64 images with augmentation off, and the loss must fall. Then lower the learning rate (3e-4) or raise it (1e-3), and consider transfer learning for 100+ classes."},
+ {c:3,lab:6,fl:1,t:"Accuracy stays at 33% or 50%",
+  s:"Train and validation accuracy hover around 0.50 for all epochs.",
+  w:"The model is not learning, often because of wrong labels or data. Lab 6 had a duplicated class folder, so about half of the labelled targets could not be predicted from the images.",
+  f:"Check <code>class_to_idx</code>, the number of images per class, and that labels line up with images. View a batch with its labels. Make sure the optimizer was given the parameters that require gradients."},
+ {c:3,lab:0,t:"Loss becomes NaN or inf",
+  s:"loss: nan after a few steps",
+  w:"The learning rate is too high, inputs are unscaled, there is a <code>log(0)</code> or division by zero in features, or gradients exploded.",
+  f:"Lower the learning rate by 10x. Standardize the inputs. Add <code>eps</code> to denominators. Use <code>nn.utils.clip_grad_norm_(params, 1.0)</code>. Check the data for NaN and inf."},
+ {c:3,lab:0,t:"Overfitting",
+  s:"Train accuracy keeps climbing, validation accuracy flat or falling. Val loss rises.",
+  w:"The model memorizes the training set.",
+  f:"Add Dropout, weight decay, augmentation, early stopping with <code>restore_best_weights</code>. Use fewer parameters. Get more data. Lower the number of epochs."},
+ {c:3,lab:0,t:"Underfitting",
+  s:"Both train and validation accuracy are low and the loss is still falling at the last epoch.",
+  w:"The model is too small, trained too briefly, or the learning rate is too low.",
+  f:"Train longer, widen layers, add a block, raise the learning rate a little, or add useful features."},
+ {c:3,lab:6,fl:1,t:"The 'best model' is not the best",
+  s:"The saved weights give a lower accuracy than the number printed during training.",
+  w:"<code>model.state_dict().copy()</code> is a shallow copy. The dictionary holds references to the live tensors, so they keep changing as training continues.",
+  f:"Use <code>copy.deepcopy(model.state_dict())</code> or clone each tensor: <code>{k: v.detach().cpu().clone() for k, v in sd.items()}</code>."},
+ {c:3,lab:0,t:"Forgot a training step",
+  s:"Loss does not change at all, or gradients accumulate and the loss explodes.",
+  w:"<code>optimizer.zero_grad()</code>, <code>loss.backward()</code> or <code>optimizer.step()</code> is missing or in the wrong order.",
+  f:"Use this order every time: <code>opt.zero_grad(); loss = fn(model(x), y); loss.backward(); opt.step()</code>. Call <code>scheduler.step()</code> once per epoch, after the optimizer."},
+ {c:3,lab:6,t:"Frozen layers still train, or nothing trains",
+  s:"Trainable parameters is huge, or 0.",
+  w:"<code>requires_grad=False</code> was set after the new layer was created (the new layer is frozen too), or the optimizer received the wrong parameters.",
+  f:"Freeze first, then replace <code>model.fc</code> (a new layer starts trainable). Print the trainable count. Pass only <code>model.fc.parameters()</code> to the optimizer."},
+ {c:3,lab:8,t:"Exploding gradients in the LSTM",
+  s:"Loss suddenly jumps to large values or NaN in a recurrent model.",
+  w:"Gradients multiplied across 100 time steps can grow very large.",
+  f:"Clip: <code>nn.utils.clip_grad_norm_(model.parameters(), 1.0)</code> between <code>backward()</code> and <code>step()</code>. Lower the learning rate. Shorten the sequence."},
+ {c:3,lab:2,t:"sklearn ConvergenceWarning",
+  s:"ConvergenceWarning: Stochastic Optimizer: Maximum iterations (50) reached and the optimization hasn't converged yet.",
+  w:"<code>max_iter</code> was too small, or features are not scaled.",
+  f:"Divide pixels by 255 or use <code>StandardScaler</code>. Raise <code>max_iter</code> (150 in Lab 2). Use <code>early_stopping=True</code> to stop automatically."},
+ {c:3,lab:0,t:"Results change on every run",
+  s:"The same code gives different accuracy each time.",
+  w:"Random weight initialization, shuffling, dropout and augmentation use random numbers.",
+  f:"Seed everything at the top: <code>random</code>, <code>numpy</code>, <code>torch</code> (and <code>torch.cuda.manual_seed_all</code>) or <code>keras.utils.set_random_seed(42)</code>. Pass <code>random_state</code> to sklearn calls. GPU kernels can still differ slightly."},
+
+ {c:4,lab:0,t:"Dropout or BatchNorm behave differently when predicting",
+  s:"Validation accuracy fluctuates, or predictions change between calls on the same data.",
+  w:"The model is still in training mode, so Dropout is active and BatchNorm uses batch statistics.",
+  f:"Call <code>model.eval()</code> before validation or prediction and wrap it in <code>with torch.no_grad():</code>. Switch back with <code>model.train()</code>."},
+ {c:4,lab:7,fl:1,t:"High precision, low recall in detection",
+  s:"Precision 0.96, recall 0.31, and Cat/Dog recall 0.00.",
+  w:"The detector is cautious. Classes with very few training boxes (Cat 6, Dog 5, Possum 2, against 247 for raccoon) are almost never predicted.",
+  f:"Add or collect more examples of the weak classes. Lower the confidence threshold when predicting (<code>conf=0.1</code>). Train for more epochs, unfreeze layers (<code>freeze=0</code>), or use a larger model. Report per-class numbers, not only the average."},
+ {c:4,lab:0,t:"Accuracy looks high on imbalanced data",
+  s:"95% accuracy but one class is never predicted.",
+  w:"If 95% of rows belong to one class, predicting that class always gives 95%.",
+  f:"Print <code>classification_report</code> and the confusion matrix. Use F1, recall or AUC. Stratify the split. Consider class weights."},
+ {c:4,lab:0,t:"Memory grows during validation",
+  s:"GPU memory climbs each epoch, or CUDA out of memory in the evaluation loop.",
+  w:"Gradients are being stored for validation batches, or loss tensors are accumulated without <code>.item()</code>.",
+  f:"Wrap evaluation in <code>torch.no_grad()</code>. Add <code>loss.item()</code> (not <code>loss</code>) to running totals."},
+ {c:4,lab:5,t:"Submission rejected or scored as zero",
+  s:"Kaggle: Evaluation Exception, Submission must have N rows, or columns do not match.",
+  w:"Wrong column names, wrong row count, wrong order, or labels in the wrong form (probabilities instead of class names or the reverse).",
+  f:"Build the submission from <code>sample_submission.csv</code>: same columns, same number of rows, same id order. For the dog-breed competition the file has one probability column per breed, in alphabetical order. Save with <code>index=False</code>."},
+
+ {c:5,lab:0,t:"GPU not used (device is cpu)",
+  s:"Device: cpu, or training is slow. <code>torch.cuda.is_available()</code> is False.",
+  w:"No accelerator is selected for the session, or the session was restarted and the setting was lost.",
+  f:"Kaggle: Session options, Accelerator, GPU, then re-run. Colab: Runtime, Change runtime type, T4 GPU. Check with <code>torch.cuda.is_available()</code> or <code>!nvidia-smi</code>."},
+ {c:5,lab:0,t:"CUDA out of memory",
+  s:"torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate ...",
+  w:"The batch, image size or model is too large for the GPU, or old tensors still occupy memory.",
+  f:"Halve <code>batch_size</code> or <code>imgsz</code>. Use <code>torch.no_grad()</code> for evaluation. Run <code>torch.cuda.empty_cache()</code> and, if memory stays full, restart the session. For YOLO use <code>batch=8</code> and a smaller model."},
+ {c:5,lab:8,t:"Download fails because Internet is off",
+  s:"URLError: &lt;urlopen error [Errno -3] Temporary failure in name resolution&gt;, or ultralytics cannot download yolo11n.pt",
+  w:"Kaggle notebooks have Internet off by default.",
+  f:"Open Session options and turn <b>Internet</b> on (phone verification required). Or add the file as an input dataset and load it from <code>/kaggle/input</code> (the Lab 8 loader falls back to any attached .txt file)."},
+ {c:5,lab:0,t:"Competition data is missing or returns 403",
+  s:"403 Forbidden when running <code>kaggle competitions download</code>.",
+  w:"The rules for the competition have not been accepted with this account.",
+  f:"Open the competition page in a browser, press <b>Join Competition</b> and accept the rules, then run the command again."},
+ {c:5,lab:0,t:"Colab: kaggle.json not found or 401 Unauthorized",
+  s:"OSError: Could not find kaggle.json, or 401 - Unauthorized",
+  w:"The token file was not copied to <code>~/.kaggle</code>, has loose permissions, or was revoked.",
+  f:"Upload <code>kaggle.json</code> again, run the mkdir/cp/chmod 600 line, or create a new token on Kaggle."},
+ {c:5,lab:0,t:"Colab disconnects and files vanish",
+  s:"Runtime disconnected. Everything in /content is gone.",
+  w:"Free sessions end after idle time or a maximum length. Local storage is temporary.",
+  f:"Save checkpoints and submissions to Google Drive during training. Save every epoch that improves. Keep the browser tab open while training."},
+ {c:5,lab:0,t:"Kaggle: Save Version runs everything again and fails",
+  s:"Notebook Exceeded allowed run time, or an error that did not appear interactively.",
+  w:"Save and Run All executes the notebook from the top in a fresh session. A cell that depended on state from earlier runs fails, and long training can hit the time limit.",
+  f:"Use <b>Restart &amp; Run All</b> before saving. Lower epochs for the saved version. Move one-time setup (downloads, installs) to the first cells."},
+ {c:5,lab:5,fl:1,t:"Two GPUs but only one is used (TensorFlow)",
+  s:"Available GPUs: [GPU:0, GPU:1] and training is no faster. Log line: <code>layout failed: INVALID_ARGUMENT ...</code>",
+  w:"Kaggle's T4 x2 shows two GPUs, and Keras uses one unless told otherwise. The <code>layout failed</code> message comes from TensorFlow's optimizer, appears in the dog-breed log, and does not stop training.",
+  f:"To use both, create the model inside <code>strategy = tf.distribute.MirroredStrategy(); with strategy.scope():</code>. Otherwise ignore the warning."},
+ {c:5,lab:0,t:"DataLoader is slow or crashes with workers",
+  s:"Training is data-bound, or RuntimeError: DataLoader worker exited unexpectedly",
+  w:"Too many or too few worker processes for the session's CPUs, or shared memory is low.",
+  f:"Use <code>num_workers=2</code> on Kaggle and Colab. Set <code>num_workers=0</code> to test if a crash comes from workers. Use smaller images or cache a resized copy."}
+];
+
+/* ---------- helpers ---------- */
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+/* ---------- code blocks ---------- */
+function copyText(text,btn,codeEl){
+  function ok(){var o=btn.textContent;btn.textContent="Copied";setTimeout(function(){btn.textContent=o},1500)}
+  function fallback(){
+    try{var r=document.createRange();r.selectNodeContents(codeEl);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent="Selected, press Ctrl+C"}catch(e){}
+  }
+  try{
+    navigator.clipboard.writeText(text).then(ok,fallback);
+  }catch(e){fallback()}
+}
+$$(".cb").forEach(function(box){
+  var src=document.getElementById(box.getAttribute("data-src"));
+  if(!src)return;
+  var code=src.textContent.replace(/^\s*\n/,"").replace(/\s+$/,"");
+  var head=document.createElement("div");head.className="cb-head";
+  var t=document.createElement("span");t.textContent=box.getAttribute("data-title")||"";
+  var b=document.createElement("button");b.type="button";b.textContent="Copy";
+  head.appendChild(t);head.appendChild(b);
+  var pre=document.createElement("pre");var c=document.createElement("code");
+  c.className="language-python";c.textContent=code;pre.appendChild(c);
+  box.appendChild(head);box.appendChild(pre);
+  b.addEventListener("click",function(){copyText(code,b,c)});
+  try{ if(window.hljs){ hljs.highlightElement(c);} }catch(e){}
+});
+
+/* ---------- references ---------- */
+(function(){
+  var m=$("#refsMount");var html="";
+  REFS.forEach(function(grp){
+    html+='<h3 class="h">'+esc(grp.g)+'</h3><div class="grid g2">';
+    grp.items.forEach(function(it){
+      html+='<a class="card" style="text-decoration:none;color:inherit;display:block" target="_blank" rel="noopener noreferrer" href="'+it[1]+'"><h4 style="color:var(--accent)">'+esc(it[0])+' &#8599;</h4><p>'+esc(it[2])+'</p><p style="font-family:var(--f-mono);font-size:.74rem;margin-top:8px;overflow-wrap:anywhere">'+esc(it[1].replace(/^https?:\/\//,""))+'</p></a>';
+    });
+    html+='</div>';
+  });
+  m.innerHTML=html;
+})();
+
+/* ---------- errors ---------- */
+var errState={cat:-1,q:""};
+function renderErrors(){
+  var list=$("#errList"),n=0,html="";
+  var q=errState.q.toLowerCase();
+  ERRS.forEach(function(e){
+    if(errState.cat>-1&&e.c!==errState.cat)return;
+    var hay=(e.t+" "+e.s+" "+e.w+" "+e.f).toLowerCase();
+    if(q&&hay.indexOf(q)<0)return;
+    n++;
+    html+='<details class="concept"><summary><span class="n">'+esc(ERR_CATS[e.c])+'</span><b>'+e.t+'</b>'+(e.fl?'<span class="tag">From the labs</span>':(e.lab?'<span class="tag neutral">Lab '+e.lab+'</span>':''))+'</summary><div class="cbody">'
+     +'<div class="wide"><h5>What you see</h5><p><code style="display:block;white-space:pre-wrap">'+e.s+'</code></p></div>'
+     +'<div><h5>Why it happens</h5><p>'+e.w+'</p></div>'
+     +'<div><h5>Fix</h5><p>'+e.f+'</p></div></div></details>';
+  });
+  list.innerHTML=html||'<div class="callout warn">No match. Try a shorter keyword such as "shape", "CUDA" or "NaN".</div>';
+  $("#errCount").textContent=n+" of "+ERRS.length+" entries";
+}
+(function(){
+  var wrap=$("#errChips");
+  var items=[["All",-1]].concat(ERR_CATS.map(function(c,i){return [c,i]}));
+  items.forEach(function(it){
+    var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=it[0];
+    b.setAttribute("aria-pressed",it[1]===-1?"true":"false");
+    b.addEventListener("click",function(){
+      errState.cat=it[1];$$(".chip",wrap).forEach(function(x){x.setAttribute("aria-pressed","false")});
+      b.setAttribute("aria-pressed","true");renderErrors();
+    });
+    wrap.appendChild(b);
+  });
+  $("#errSearch").addEventListener("input",function(e){errState.q=e.target.value;renderErrors()});
+  renderErrors();
+})();
+
+/* ---------- problem filter ---------- */
+$$("#inputChips .chip").forEach(function(ch){
+  ch.addEventListener("click",function(){
+    var f=ch.getAttribute("data-f");
+    $$("#inputChips .chip").forEach(function(x){x.setAttribute("aria-pressed",x===ch?"true":"false")});
+    $$("#pcards .pcard").forEach(function(c){
+      var on=f==="all"||c.getAttribute("data-in")===f||(f==="images"&&c.getAttribute("data-in")==="boxes"&&false);
+      c.classList.toggle("dim",!on);
+    });
+  });
+});
+
+/* ---------- lab tabs ---------- */
+function setLab(n){
+  $$("#labnav button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-lab")===String(n)?"true":"false")});
+  $$(".lab").forEach(function(l){l.classList.toggle("on",l.id==="lab"+n)});
+}
+$$("#labnav button").forEach(function(b){b.addEventListener("click",function(){setLab(b.getAttribute("data-lab"))})});
+
+/* ---------- views and routing ---------- */
+var VIEWS=["recognize","concepts","code","refs","run","errors"];
+function show(v){
+  VIEWS.forEach(function(x){var el=document.getElementById("v-"+x);if(el)el.classList.toggle("on",x===v)});
+  $$(".nav a").forEach(function(a){a.setAttribute("aria-current",a.getAttribute("data-view")===v?"true":"false")});
+}
+function go(hash,noScroll){
+  var h=(hash||"").replace(/^#/,"");
+  var m;
+  if((m=/^lab([1-8])$/.exec(h))){show("code");setLab(m[1]);if(!noScroll)window.scrollTo(0,0);return}
+  if((m=/^c-lab([1-8])$/.exec(h))){
+    show("concepts");var d=document.getElementById(h);
+    if(d){d.open=true;if(!noScroll)setTimeout(function(){d.scrollIntoView({block:"start"})},30)}
+    return;
+  }
+  if(VIEWS.indexOf(h)>-1){show(h);if(!noScroll)window.scrollTo(0,0);return}
+  show("recognize");
+}
+document.addEventListener("click",function(e){
+  var a=e.target.closest&&e.target.closest('a[href^="#"]');
+  if(!a)return;
+  e.preventDefault();
+  var h=a.getAttribute("href");
+  go(h);
+  try{history.replaceState(null,"",h)}catch(err){}
+});
+window.addEventListener("hashchange",function(){go(location.hash)});
+go(location.hash,true);
+
+/* ---------- theme ---------- */
+$("#themeBtn").addEventListener("click",function(){
+  var root=document.documentElement;
+  var cur=root.getAttribute("data-theme")||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  root.setAttribute("data-theme",cur==="dark"?"light":"dark");
+});
+})();
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>
